@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT"
     };
-    options.AddSecurityDefinition(JwtConfigKeys.BearerScheme, jwtScheme);
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtScheme);
 
     OpenApiSecurityRequirement requirement = new OpenApiSecurityRequirement
     {
@@ -51,7 +51,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = JwtConfigKeys.BearerScheme
+                    Id = JwtBearerDefaults.AuthenticationScheme
                 }
             },
             Array.Empty<string>()

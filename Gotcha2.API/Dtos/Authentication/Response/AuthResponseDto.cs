@@ -7,6 +7,8 @@ namespace Gotcha2.API.Dtos.Authentication.Response
     // sends it on every subsequent request as `Authorization: Bearer <token>`.
     public class AuthResponseDto
     {
+        public required Guid UserId { get; init; }
+
         // The encoded JWT string itself (header.payload.signature).
         public required string Token { get; init; }
 

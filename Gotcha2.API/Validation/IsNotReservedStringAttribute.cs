@@ -11,7 +11,6 @@ namespace Gotcha2.API.Validation
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class IsNotReservedStringAttribute : ValidationAttribute
     {
-        // Stored lowercase — input is also lowercased before the lookup.
         private static readonly string[] ReservedValues = new[]
         {
             "null",
@@ -22,7 +21,6 @@ namespace Gotcha2.API.Validation
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            // [Required] handles null — if we got here with null, treat as valid (skip).
             if (value is null)
             {
                 return ValidationResult.Success;
@@ -40,9 +38,7 @@ namespace Gotcha2.API.Validation
                 return new ValidationResult($"{validationContext.DisplayName} cannot be empty or whitespace.");
             }
 
-            string trimmedLower = trimmed.ToLower();
-
-            if (ReservedValues.Contains(trimmedLower))
+            if (ReservedValues.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
             {
                 return new ValidationResult($"{validationContext.DisplayName} is not a valid value.");
             }

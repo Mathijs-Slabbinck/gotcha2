@@ -4,11 +4,15 @@ namespace Gotcha2.API.Services.Helpers.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {
-        // Callers must guard with [Authorize], so the NameIdentifier claim is always present
-        // and is a parseable Guid (we put it there ourselves in AuthController.GenerateTokenAsync).
         public static Guid GetUserId(this ClaimsPrincipal user)
         {
-            string raw = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            string? raw = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (raw is null)
+            {
+                throw new InvalidOperationException("NameIdentifier claim is missing. Ensure [Authorize] is applied.");
+            }
+
             return Guid.Parse(raw);
         }
     }

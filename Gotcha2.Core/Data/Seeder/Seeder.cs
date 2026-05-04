@@ -16,7 +16,13 @@ namespace Gotcha2.Core.Data.Seeder
             if (!exists)
             {
                 IdentityRole<Guid> role = new IdentityRole<Guid>(Roles.User);
-                await roleManager.CreateAsync(role);
+                IdentityResult result = await roleManager.CreateAsync(role);
+
+                if (!result.Succeeded)
+                {
+                    string errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to seed role '{Roles.User}': {errors}");
+                }
             }
         }
     }

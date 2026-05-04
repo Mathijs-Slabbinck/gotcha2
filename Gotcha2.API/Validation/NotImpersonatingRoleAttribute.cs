@@ -11,9 +11,6 @@ namespace Gotcha2.API.Validation
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class NotImpersonatingRoleAttribute : ValidationAttribute
     {
-        // Stored lowercase — input is also lowercased before the lookup.
-        // "user" is included even though it's our only role — a FirstName of "User" would be
-        // confusing in the UI. "admin" stays as a guard against future re-introduction.
         private static readonly string[] ReservedRoles = new[]
         {
             "admin",
@@ -36,9 +33,9 @@ namespace Gotcha2.API.Validation
                 return new ValidationResult("Value must be a string.");
             }
 
-            string trimmedLower = text.Trim().ToLower();
+            string trimmed = text.Trim();
 
-            if (ReservedRoles.Contains(trimmedLower))
+            if (ReservedRoles.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
             {
                 return new ValidationResult($"{validationContext.DisplayName} cannot be a reserved role name.");
             }

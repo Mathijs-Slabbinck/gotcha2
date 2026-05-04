@@ -32,9 +32,10 @@ namespace Gotcha2.API.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string[]), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto dto)
         {
-            // [ApiController] already runs DataAnnotations on `dto` and returns 400 if any fail.
             GotchaUser? existingByEmail = await _userManager.FindByEmailAsync(dto.Email);
 
             if (existingByEmail is not null)
@@ -57,14 +58,16 @@ namespace Gotcha2.API.Controllers
 
             if (!createResult.Succeeded)
             {
-                return BadRequest(createResult.Errors.Select(e => e.Description));
+                return BadRequest(createResult.Errors.Select(e => e.Description).ToArray());
             }
 
             IdentityResult roleResult = await _userManager.AddToRoleAsync(user, Roles.User);
 
             if (!roleResult.Succeeded)
             {
-                return BadRequest(roleResult.Errors.Select(e => e.Description));
+                // Roll back the user — otherwise the duplicate-email guard above would lock the email out forever.
+                await _userManager.DeleteAsync(user);
+                return BadRequest(roleResult.Errors.Select(e => e.Description).ToArray());
             }
 
             AuthResponseDto response = await GenerateTokenAsync(user);
@@ -79,6 +82,8 @@ namespace Gotcha2.API.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string[]), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
             GotchaUser? user = await _userManager.FindByEmailAsync(dto.Email);
@@ -167,6 +172,7 @@ namespace Gotcha2.API.Controllers
 
             return new AuthResponseDto
             {
+                UserId = user.Id,
                 Token = tokenString,
                 ExpiresAtUtc = expiresAt
             };
