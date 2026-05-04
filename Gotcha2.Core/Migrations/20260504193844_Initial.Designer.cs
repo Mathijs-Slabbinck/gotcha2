@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gotcha2.Core.Migrations
 {
     [DbContext(typeof(Gotcha2DBContext))]
-    [Migration("20260427043038_Initial")]
+    [Migration("20260504193844_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -135,7 +135,6 @@ namespace Gotcha2.Core.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
