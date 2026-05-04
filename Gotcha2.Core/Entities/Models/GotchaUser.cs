@@ -8,8 +8,6 @@ namespace Gotcha2.Core.Entities.Models
         public override Guid Id { get; set; } = Guid.NewGuid();
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        // UserName is inherited from IdentityUser, but we need to override it to make it required (non-nullable)
-        public required override string UserName { get; set; }
         // Inherited from IdentityUser (GotchaUser.Email)
         public required override string Email { get; set; }
         public bool HasProfileImage { get; set; }
