@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Gotcha2.API/Gotcha2.API.csproj" />
+  <Project Path="Gotcha2.Core/Gotcha2.Core.csproj" />
+</Solution>
