@@ -137,6 +137,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IPlayerRepoService, PlayerRepoService>();
 builder.Services.AddScoped<IGameRepoService, GameRepoService>();
 builder.Services.AddScoped<IKillRepoService, KillRepoService>();
+builder.Services.AddScoped<ITargetAssignmentRepoService, TargetAssignmentRepoService>();
 
 // === CORS ===
 string[] allowedOrigins = builder.Configuration
