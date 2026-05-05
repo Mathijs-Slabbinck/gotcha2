@@ -1,5 +1,7 @@
 using Gotcha2.API.Dtos.Games.Response;
 using Gotcha2.API.Dtos.Games.Response.Summary;
+using Gotcha2.API.Dtos.Kills.Response;
+using Gotcha2.API.Dtos.Kills.Response.Summary;
 using Gotcha2.API.Dtos.Players.Response;
 using Gotcha2.API.Dtos.Players.Response.Summary;
 using Gotcha2.Core.Entities.Models;
@@ -74,6 +76,29 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 WinnerId = game.WinnerId,
                 CreatorId = game.CreatorId,
                 PlayerCount = game.Players.Count
+            };
+        }
+
+        public static KillResponseDto MapToResponseDto(this Kill kill)
+        {
+            return new KillResponseDto
+            {
+                Id = kill.Id,
+                GameId = kill.GameId,
+                Moment = kill.Moment,
+                Killer = kill.Killer.MapToPlayerSummaryDto(),
+                Victim = kill.Victim.MapToPlayerSummaryDto()
+            };
+        }
+
+        public static KillSummaryDto MapToKillSummaryDto(this Kill kill)
+        {
+            return new KillSummaryDto
+            {
+                Id = kill.Id,
+                Moment = kill.Moment,
+                Killer = kill.Killer.MapToPlayerSummaryDto(),
+                Victim = kill.Victim.MapToPlayerSummaryDto()
             };
         }
     }
