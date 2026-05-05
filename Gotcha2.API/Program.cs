@@ -3,6 +3,8 @@ using Gotcha2.API.Constants.Contracts;
 using Gotcha2.Core.Data;
 using Gotcha2.Core.Data.Seeder;
 using Gotcha2.Core.Entities.Models;
+using Gotcha2.Core.Interfaces;
+using Gotcha2.Core.Services.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -130,6 +132,9 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+
+// === Repositories ===
+builder.Services.AddScoped<IPlayerRepoService, PlayerRepoService>();
 
 // === CORS ===
 string[] allowedOrigins = builder.Configuration
