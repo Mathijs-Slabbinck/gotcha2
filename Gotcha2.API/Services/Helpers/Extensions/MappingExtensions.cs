@@ -4,6 +4,7 @@ using Gotcha2.API.Dtos.Kills.Response;
 using Gotcha2.API.Dtos.Kills.Response.Summary;
 using Gotcha2.API.Dtos.Players.Response;
 using Gotcha2.API.Dtos.Players.Response.Summary;
+using Gotcha2.API.Dtos.TargetAssignments.Response;
 using Gotcha2.Core.Entities.Models;
 
 namespace Gotcha2.API.Services.Helpers.Extensions
@@ -99,6 +100,18 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 Moment = kill.Moment,
                 Killer = kill.Killer.MapToPlayerSummaryDto(),
                 Victim = kill.Victim.MapToPlayerSummaryDto()
+            };
+        }
+
+        public static TargetAssignmentResponseDto MapToResponseDto(this TargetAssignment assignment)
+        {
+            return new TargetAssignmentResponseDto
+            {
+                Id = assignment.Id,
+                GameId = assignment.GameId,
+                TargetAssigned = assignment.TargetAssigned,
+                Hunter = assignment.Hunter.MapToPlayerSummaryDto(),
+                Target = assignment.Target.MapToPlayerSummaryDto()
             };
         }
     }
