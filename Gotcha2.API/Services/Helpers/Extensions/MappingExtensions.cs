@@ -1,3 +1,5 @@
+using Gotcha2.API.Dtos.Games.Response;
+using Gotcha2.API.Dtos.Games.Response.Summary;
 using Gotcha2.API.Dtos.Players.Response;
 using Gotcha2.API.Dtos.Players.Response.Summary;
 using Gotcha2.Core.Entities.Models;
@@ -37,6 +39,41 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 GameName = player.Game.Name,
                 IsAlive = player.IsAlive,
                 Notes = player.Notes
+            };
+        }
+
+        public static GameResponseDto MapToResponseDto(this Game game)
+        {
+            return new GameResponseDto
+            {
+                Id = game.Id,
+                Name = game.Name,
+                CreationDate = game.CreationDate,
+                StartDate = game.StartDate,
+                EndDate = game.EndDate,
+                HasStarted = game.HasStarted,
+                IsFinished = game.IsFinished,
+                WinnerId = game.WinnerId,
+                CreatorId = game.CreatorId,
+                Players = game.Players.Select(MapToPlayerSummaryDto).ToList(),
+                KillCount = game.Kills.Count
+            };
+        }
+
+        public static GameSummaryDto MapToGameSummaryDto(this Game game)
+        {
+            return new GameSummaryDto
+            {
+                Id = game.Id,
+                Name = game.Name,
+                CreationDate = game.CreationDate,
+                StartDate = game.StartDate,
+                EndDate = game.EndDate,
+                HasStarted = game.HasStarted,
+                IsFinished = game.IsFinished,
+                WinnerId = game.WinnerId,
+                CreatorId = game.CreatorId,
+                PlayerCount = game.Players.Count
             };
         }
     }
