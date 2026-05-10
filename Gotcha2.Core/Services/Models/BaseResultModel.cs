@@ -2,7 +2,7 @@
 {
     public class BaseResultModel
     {
-        public bool IsSuccess { get => !Errors.Any(); }
+        public bool IsSuccess => !Errors.Any();
         public IList<string> Errors { get; set; } = new List<string>();
     }
 }

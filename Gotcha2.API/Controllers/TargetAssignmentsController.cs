@@ -27,14 +27,10 @@ namespace Gotcha2.API.Controllers
             ResultModel<TargetAssignment?> result = await _targetRepo.GetMyTargetAsync(gameId, currentUserId);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             if (result.Data == null)
-            {
                 return NotFound(new[] { "You have no open target assignment in this game." });
-            }
 
             return Ok(result.Data.MapToResponseDto());
         }

@@ -17,44 +17,13 @@ namespace Gotcha2.Core.Services.Repository
 
         #region === CRUD ===
 
-        public async Task<ResultModel<List<Game>>> GetAllAsync()
-        {
-            ResultModel<List<Game>> resultModel = new ResultModel<List<Game>>();
-
-            try
-            {
-                List<Game> games = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .OrderByDescending(g => g.CreationDate)
-                    .ToListAsync();
-                resultModel.Data = games;
-                return resultModel;
-            }
-            catch (TimeoutException)
-            {
-                resultModel.Errors.Add("The server timed out while trying to fetch the games!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to fetch the games!");
-                return resultModel;
-            }
-        }
-
         public async Task<ResultModel<Game>> GetByIdAsync(Guid id)
         {
             ResultModel<Game> resultModel = new ResultModel<Game>();
 
             try
             {
-                Game? game = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(g => g.Id == id);
+                Game? game = await GamesWithDetailsReadOnly().FirstOrDefaultAsync(g => g.Id == id);
 
                 if (game == null)
                 {
@@ -88,11 +57,7 @@ namespace Gotcha2.Core.Services.Repository
 
                 // Reload with the full graph so callers can map without a second round-trip.
                 // The User nav on the freshly-inserted creator Player is null otherwise, and mapping NPEs.
-                Game? reloaded = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(g => g.Id == game.Id);
+                Game? reloaded = await GamesWithDetailsTracked().FirstOrDefaultAsync(g => g.Id == game.Id);
 
                 resultModel.Data = reloaded!;
                 return resultModel;
@@ -117,11 +82,7 @@ namespace Gotcha2.Core.Services.Repository
             {
                 // Load with the full graph upfront so the returned entity is mappable without a reload
                 // (matches reference ConcertRepoService.UpdateAsync — loads Artists + Tickets up front).
-                Game? existing = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(g => g.Id == game.Id);
+                Game? existing = await GamesWithDetailsTracked().FirstOrDefaultAsync(g => g.Id == game.Id);
 
                 if (existing == null)
                 {
@@ -183,11 +144,17 @@ namespace Gotcha2.Core.Services.Repository
             }
         }
 
-        public async Task<bool> DoesItExist(Guid id)
-        {
-            return await _dbContext.Games.AnyAsync(g => g.Id == id);
-        }
+        #endregion
 
+        #region === HELPERS ===
+
+        private IQueryable<Game> GamesWithDetailsTracked() => _dbContext.Games
+                                                                    .Include(g => g.Players)
+                                                                        .ThenInclude(p => p.User)
+                                                                    .Include(g => g.Kills)
+                                                                    .AsSplitQuery();
+
+        private IQueryable<Game> GamesWithDetailsReadOnly() => GamesWithDetailsTracked().AsNoTracking();
         #endregion
 
         #region === DOMAIN OPS ===
@@ -198,13 +165,12 @@ namespace Gotcha2.Core.Services.Repository
 
             try
             {
-                List<Game> games = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .Where(g => g.Players.Any(p => p.UserId == userId))
-                    .OrderByDescending(g => g.CreationDate)
-                    .ToListAsync();
+                List<Game> games = await GamesWithDetailsReadOnly()
+                                                .Where(g => g.Players
+                                                                .Any(p => p.UserId == userId))
+                                                .OrderByDescending(g => g.CreationDate)
+                                                .ToListAsync();
+
                 resultModel.Data = games;
                 return resultModel;
             }
@@ -227,8 +193,8 @@ namespace Gotcha2.Core.Services.Repository
             try
             {
                 Game? game = await _dbContext.Games
-                    .Include(g => g.Players)
-                    .FirstOrDefaultAsync(g => g.Id == gameId);
+                                                .Include(g => g.Players)
+                                                .FirstOrDefaultAsync(g => g.Id == gameId);
 
                 if (game == null)
                 {
@@ -267,11 +233,7 @@ namespace Gotcha2.Core.Services.Repository
                 await _dbContext.SaveChangesAsync();
 
                 // Reload to get the user and updated player list materialised for mapping.
-                Game? reloaded = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(g => g.Id == gameId);
+                Game? reloaded = await GamesWithDetailsTracked().FirstOrDefaultAsync(g => g.Id == gameId);
 
                 resultModel.Data = reloaded!;
                 return resultModel;
@@ -295,8 +257,8 @@ namespace Gotcha2.Core.Services.Repository
             try
             {
                 Game? game = await _dbContext.Games
-                    .Include(g => g.Players)
-                    .FirstOrDefaultAsync(g => g.Id == gameId);
+                                                .Include(g => g.Players)
+                                                .FirstOrDefaultAsync(g => g.Id == gameId);
 
                 if (game == null)
                 {
@@ -323,8 +285,13 @@ namespace Gotcha2.Core.Services.Repository
                 }
 
                 // Shuffle the players into a ring: shuffled[i] hunts shuffled[(i + 1) % count].
-                List<Player> shuffled = game.Players.OrderBy(_ => Random.Shared.Next()).ToList();
+                List<Player> shuffled = game.Players.ToList();
                 int playerCount = shuffled.Count;
+                for (int i = playerCount - 1; i > 0; i--)
+                {
+                    int j = Random.Shared.Next(i + 1);
+                    (shuffled[i], shuffled[j]) = (shuffled[j], shuffled[i]);
+                }
 
                 for (int i = 0; i < playerCount; i++)
                 {
@@ -348,11 +315,7 @@ namespace Gotcha2.Core.Services.Repository
                 await _dbContext.SaveChangesAsync();
 
                 // Reload with full graph for mapping.
-                Game? reloaded = await _dbContext.Games
-                    .Include(g => g.Players).ThenInclude(p => p.User)
-                    .Include(g => g.Kills)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(g => g.Id == gameId);
+                Game? reloaded = await GamesWithDetailsTracked().FirstOrDefaultAsync(g => g.Id == gameId);
 
                 resultModel.Data = reloaded!;
                 return resultModel;
@@ -365,6 +328,27 @@ namespace Gotcha2.Core.Services.Repository
             catch (Exception)
             {
                 resultModel.Errors.Add("An unexpected error occurred while trying to start the game!");
+                return resultModel;
+            }
+        }
+
+        public async Task<ResultModel<int>> CountWinsByUserAsync(Guid userId)
+        {
+            ResultModel<int> resultModel = new ResultModel<int>();
+
+            try
+            {
+                resultModel.Data = await _dbContext.Games.CountAsync(g => g.IsFinished && g.WinnerId == userId);
+                return resultModel;
+            }
+            catch (TimeoutException)
+            {
+                resultModel.Errors.Add("The server timed out while trying to count the games!");
+                return resultModel;
+            }
+            catch (Exception)
+            {
+                resultModel.Errors.Add("Something went wrong while trying to count the games!");
                 return resultModel;
             }
         }

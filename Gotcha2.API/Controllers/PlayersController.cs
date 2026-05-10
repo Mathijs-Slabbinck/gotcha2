@@ -1,4 +1,3 @@
-using Gotcha2.API.Dtos.Players.Response;
 using Gotcha2.API.Dtos.Players.Response.Summary;
 using Gotcha2.API.Services.Helpers.Extensions;
 using Gotcha2.Core.Entities.Models;
@@ -29,21 +28,16 @@ namespace Gotcha2.API.Controllers
             ResultModel<List<Player>> playersResult = await _playerRepo.GetByGameAsync(gameId);
 
             if (!playersResult.IsSuccess)
-            {
-                return BadRequest(playersResult.Errors);
-            }
+                return NotFound(playersResult.Errors);
 
             Guid currentUserId = User.GetUserId();
-            bool isInGame = playersResult.Data!.Any(p => p.UserId == currentUserId);
 
-            if (!isInGame)
-            {
+            if (!playersResult.Data!.IsMember(currentUserId))
                 return Forbid();
-            }
 
             List<PlayerSummaryDto> response = playersResult.Data!
-                .Select(p => p.MapToPlayerSummaryDto())
-                .ToList();
+                                                            .Select(p => p.MapToPlayerSummaryDto())
+                                                            .ToList();
 
             return Ok(response);
         }
@@ -58,25 +52,17 @@ namespace Gotcha2.API.Controllers
             ResultModel<Player> result = await _playerRepo.GetByIdAsync(id);
 
             if (!result.IsSuccess)
-            {
                 return NotFound(result.Errors);
-            }
 
             // Caller must share a game with the requested player.
             Guid currentUserId = User.GetUserId();
-            ResultModel<List<Player>> gamePlayersResult = await _playerRepo.GetByGameAsync(result.Data!.GameId);
+            ResultModel<bool> membershipResult = await _playerRepo.IsUserInGameAsync(result.Data!.GameId, currentUserId);
 
-            if (!gamePlayersResult.IsSuccess)
-            {
-                return BadRequest(gamePlayersResult.Errors);
-            }
+            if (!membershipResult.IsSuccess)
+                return BadRequest(membershipResult.Errors);
 
-            bool isInGame = gamePlayersResult.Data!.Any(p => p.UserId == currentUserId);
-
-            if (!isInGame)
-            {
+            if (!membershipResult.Data)
                 return Forbid();
-            }
 
             return Ok(result.Data!.MapToResponseDto());
         }
@@ -91,30 +77,22 @@ namespace Gotcha2.API.Controllers
             ResultModel<Player> existing = await _playerRepo.GetByIdAsync(id);
 
             if (!existing.IsSuccess)
-            {
                 return NotFound(existing.Errors);
-            }
 
             Guid currentUserId = User.GetUserId();
 
             // Only the owner can leave (delete their own player row).
             if (existing.Data!.UserId != currentUserId)
-            {
                 return Forbid();
-            }
 
             // Game must not have started.
-            if (existing.Data!.Game.HasStarted)
-            {
+            if (existing.Data!.Game!.HasStarted)
                 return BadRequest(new[] { "Cannot leave a game that has already started." });
-            }
 
             ResultModel<Player> deleteResult = await _playerRepo.DeleteAsync(id);
 
             if (!deleteResult.IsSuccess)
-            {
                 return BadRequest(deleteResult.Errors);
-            }
 
             return NoContent();
         }

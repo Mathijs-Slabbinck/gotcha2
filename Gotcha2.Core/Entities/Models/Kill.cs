@@ -3,12 +3,12 @@
     public class Kill
     {
         public Guid Id { get; init; } = Guid.NewGuid();
-        public Guid GameId { get; init; }
-        public Game Game { get; init; }
-        public Guid KillerId { get; init; }
-        public Player Killer { get; init; }
-        public Guid VictimId { get; init; }
-        public Player Victim { get; init; }
+        public required Guid GameId { get; init; }
+        public Game? Game { get; init; }
+        public required Guid KillerId { get; init; }
+        public Player? Killer { get; init; }
+        public required Guid VictimId { get; init; }
+        public Player? Victim { get; init; }
         public DateTime Moment { get; init; } = DateTime.UtcNow;
     }
 }

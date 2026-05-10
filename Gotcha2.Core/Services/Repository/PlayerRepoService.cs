@@ -15,31 +15,6 @@ namespace Gotcha2.Core.Services.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<ResultModel<List<Player>>> GetAllAsync()
-        {
-            ResultModel<List<Player>> resultModel = new ResultModel<List<Player>>();
-
-            try
-            {
-                List<Player> players = await _dbContext.Players
-                    .Include(p => p.User)
-                    .Include(p => p.Game)
-                    .ToListAsync();
-                resultModel.Data = players;
-                return resultModel;
-            }
-            catch (TimeoutException)
-            {
-                resultModel.Errors.Add("The server timed out while trying to fetch the players!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to fetch the players!");
-                return resultModel;
-            }
-        }
-
         public async Task<ResultModel<Player>> GetByIdAsync(Guid id)
         {
             ResultModel<Player> resultModel = new ResultModel<Player>();
@@ -47,9 +22,10 @@ namespace Gotcha2.Core.Services.Repository
             try
             {
                 Player? player = await _dbContext.Players
-                    .Include(p => p.User)
-                    .Include(p => p.Game)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                                                    .AsNoTracking()
+                                                    .Include(p => p.User)
+                                                    .Include(p => p.Game)
+                                                    .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (player == null)
                 {
@@ -79,9 +55,10 @@ namespace Gotcha2.Core.Services.Repository
             try
             {
                 List<Player> players = await _dbContext.Players
-                    .Include(p => p.User)
-                    .Where(p => p.GameId == gameId)
-                    .ToListAsync();
+                                                            .AsNoTracking()
+                                                            .Include(p => p.User)
+                                                            .Where(p => p.GameId == gameId)
+                                                            .ToListAsync();
                 resultModel.Data = players;
                 return resultModel;
             }
@@ -97,63 +74,24 @@ namespace Gotcha2.Core.Services.Repository
             }
         }
 
-        public async Task<ResultModel<Player>> AddAsync(Player player)
+        public async Task<ResultModel<bool>> IsUserInGameAsync(Guid gameId, Guid userId)
         {
-            ResultModel<Player> resultModel = new ResultModel<Player>();
+            ResultModel<bool> resultModel = new ResultModel<bool>();
 
             try
             {
-                await _dbContext.Players.AddAsync(player);
-                await _dbContext.SaveChangesAsync();
-                resultModel.Data = player;
+                resultModel.Data = await _dbContext.Players
+                                                        .AnyAsync(p => p.GameId == gameId && p.UserId == userId);
                 return resultModel;
             }
-            catch (DbUpdateException)
+            catch (TimeoutException)
             {
-                resultModel.Errors.Add("Something went wrong while trying to add the player!");
+                resultModel.Errors.Add("The server timed out while checking game membership!");
                 return resultModel;
             }
             catch (Exception)
             {
-                resultModel.Errors.Add("An unexpected error occurred while trying to add the player!");
-                return resultModel;
-            }
-        }
-
-        public async Task<ResultModel<Player>> UpdateAsync(Player player)
-        {
-            ResultModel<Player> resultModel = new ResultModel<Player>();
-
-            try
-            {
-                Player? existing = await _dbContext.Players.FirstOrDefaultAsync(p => p.Id == player.Id);
-
-                if (existing == null)
-                {
-                    resultModel.Errors.Add("No player with this id was found!");
-                    return resultModel;
-                }
-
-                existing.IsAlive = player.IsAlive;
-                existing.Notes = player.Notes;
-
-                await _dbContext.SaveChangesAsync();
-                resultModel.Data = existing;
-                return resultModel;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                resultModel.Errors.Add("The player you are trying to update has already been updated!");
-                return resultModel;
-            }
-            catch (DbUpdateException)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to update the player!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("An unexpected error occurred while trying to update the player!");
+                resultModel.Errors.Add("Something went wrong while checking game membership!");
                 return resultModel;
             }
         }
@@ -189,9 +127,25 @@ namespace Gotcha2.Core.Services.Repository
             }
         }
 
-        public async Task<bool> DoesItExist(Guid id)
+        public async Task<ResultModel<int>> CountByUserAsync(Guid userId)
         {
-            return await _dbContext.Players.AnyAsync(p => p.Id == id);
+            ResultModel<int> resultModel = new ResultModel<int>();
+
+            try
+            {
+                resultModel.Data = await _dbContext.Players.CountAsync(p => p.UserId == userId);
+                return resultModel;
+            }
+            catch (TimeoutException)
+            {
+                resultModel.Errors.Add("The server timed out while trying to count the players!");
+                return resultModel;
+            }
+            catch (Exception)
+            {
+                resultModel.Errors.Add("Something went wrong while trying to count the players!");
+                return resultModel;
+            }
         }
     }
 }

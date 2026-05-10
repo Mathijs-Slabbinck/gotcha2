@@ -31,13 +31,11 @@ namespace Gotcha2.API.Controllers
             ResultModel<List<Game>> result = await _gameRepo.GetByUserAsync(currentUserId);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             List<GameSummaryDto> response = result.Data!
-                .Select(g => g.MapToGameSummaryDto())
-                .ToList();
+                                                    .Select(g => g.MapToGameSummaryDto())
+                                                    .ToList();
 
             return Ok(response);
         }
@@ -52,17 +50,12 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> result = await _gameRepo.GetByIdAsync(id);
 
             if (!result.IsSuccess)
-            {
                 return NotFound(result.Errors);
-            }
 
             Guid currentUserId = User.GetUserId();
-            bool isInGame = result.Data!.Players.Any(p => p.UserId == currentUserId);
 
-            if (!isInGame)
-            {
+            if (!result.Data!.IsMember(currentUserId))
                 return Forbid();
-            }
 
             return Ok(result.Data!.MapToResponseDto());
         }
@@ -95,9 +88,7 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> addResult = await _gameRepo.AddAsync(game);
 
             if (!addResult.IsSuccess)
-            {
                 return BadRequest(addResult.Errors);
-            }
 
             // GameRepoService.AddAsync reloads the full graph internally, so addResult.Data is mappable.
             GameResponseDto response = addResult.Data!.MapToResponseDto();
@@ -117,21 +108,15 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> existing = await _gameRepo.GetByIdAsync(id);
 
             if (!existing.IsSuccess)
-            {
                 return NotFound(existing.Errors);
-            }
 
             Guid currentUserId = User.GetUserId();
 
             if (existing.Data!.CreatorId != currentUserId)
-            {
                 return Forbid();
-            }
 
             if (existing.Data!.HasStarted)
-            {
                 return BadRequest(new[] { "Cannot rename a game that has already started." });
-            }
 
             Game updated = new Game
             {
@@ -142,9 +127,7 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> result = await _gameRepo.UpdateAsync(updated);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             // GameRepoService.UpdateAsync loads the full graph internally, so result.Data is mappable.
             return Ok(result.Data!.MapToResponseDto());
@@ -160,31 +143,23 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> existing = await _gameRepo.GetByIdAsync(id);
 
             if (!existing.IsSuccess)
-            {
                 return NotFound(existing.Errors);
-            }
 
             Guid currentUserId = User.GetUserId();
 
             if (existing.Data!.CreatorId != currentUserId)
-            {
                 return Forbid();
-            }
 
             // Allow only when nobody but the creator has joined (otherwise risks deleting other people's data).
             bool hasOtherPlayers = existing.Data!.Players.Any(p => p.UserId != currentUserId);
 
             if (hasOtherPlayers)
-            {
                 return BadRequest(new[] { "Cannot delete a game that other players have joined." });
-            }
 
             ResultModel<Game> result = await _gameRepo.DeleteAsync(id);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             return NoContent();
         }
@@ -200,9 +175,7 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> result = await _gameRepo.JoinAsync(id, currentUserId);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             return Ok(result.Data!.MapToResponseDto());
         }
@@ -218,9 +191,7 @@ namespace Gotcha2.API.Controllers
             ResultModel<Game> result = await _gameRepo.StartAsync(id, currentUserId);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             return Ok(result.Data!.MapToResponseDto());
         }

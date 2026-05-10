@@ -15,65 +15,7 @@ namespace Gotcha2.Core.Services.Repository
             _dbContext = dbContext;
         }
 
-        #region === CRUD (mostly read-only — writes go through RecordKillAsync) ===
-
-        public async Task<ResultModel<List<Kill>>> GetAllAsync()
-        {
-            ResultModel<List<Kill>> resultModel = new ResultModel<List<Kill>>();
-
-            try
-            {
-                List<Kill> kills = await _dbContext.Kills
-                    .Include(k => k.Killer).ThenInclude(p => p.User)
-                    .Include(k => k.Victim).ThenInclude(p => p.User)
-                    .OrderByDescending(k => k.Moment)
-                    .ToListAsync();
-                resultModel.Data = kills;
-                return resultModel;
-            }
-            catch (TimeoutException)
-            {
-                resultModel.Errors.Add("The server timed out while trying to fetch the kills!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to fetch the kills!");
-                return resultModel;
-            }
-        }
-
-        public async Task<ResultModel<Kill>> GetByIdAsync(Guid id)
-        {
-            ResultModel<Kill> resultModel = new ResultModel<Kill>();
-
-            try
-            {
-                Kill? kill = await _dbContext.Kills
-                    .Include(k => k.Killer).ThenInclude(p => p.User)
-                    .Include(k => k.Victim).ThenInclude(p => p.User)
-                    .FirstOrDefaultAsync(k => k.Id == id);
-
-                if (kill == null)
-                {
-                    resultModel.Errors.Add($"No kill found with id {id}!");
-                    return resultModel;
-                }
-
-                resultModel.Data = kill;
-                return resultModel;
-            }
-            catch (TimeoutException)
-            {
-                resultModel.Errors.Add("The server timed out while trying to fetch the kill!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("An unexpected error occurred while trying to fetch the kill!");
-                return resultModel;
-            }
-        }
+        #region === READS ===
 
         public async Task<ResultModel<List<Kill>>> GetByGameAsync(Guid gameId)
         {
@@ -82,11 +24,14 @@ namespace Gotcha2.Core.Services.Repository
             try
             {
                 List<Kill> kills = await _dbContext.Kills
-                    .Include(k => k.Killer).ThenInclude(p => p.User)
-                    .Include(k => k.Victim).ThenInclude(p => p.User)
-                    .Where(k => k.GameId == gameId)
-                    .OrderByDescending(k => k.Moment)
-                    .ToListAsync();
+                                                        .AsNoTracking()
+                                                        .Include(k => k.Killer)
+                                                            .ThenInclude(p => p!.User)
+                                                        .Include(k => k.Victim)
+                                                            .ThenInclude(p => p!.User)
+                                                        .Where(k => k.GameId == gameId)
+                                                        .OrderByDescending(k => k.Moment)
+                                                        .ToListAsync();
                 resultModel.Data = kills;
                 return resultModel;
             }
@@ -100,74 +45,6 @@ namespace Gotcha2.Core.Services.Repository
                 resultModel.Errors.Add("Something went wrong while trying to fetch the kills!");
                 return resultModel;
             }
-        }
-
-        // Reserved — direct writes go through RecordKillAsync. Kept to satisfy IRepositoryService<Kill>.
-        public async Task<ResultModel<Kill>> AddAsync(Kill kill)
-        {
-            ResultModel<Kill> resultModel = new ResultModel<Kill>();
-
-            try
-            {
-                await _dbContext.Kills.AddAsync(kill);
-                await _dbContext.SaveChangesAsync();
-                resultModel.Data = kill;
-                return resultModel;
-            }
-            catch (DbUpdateException)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to add the kill!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("An unexpected error occurred while trying to add the kill!");
-                return resultModel;
-            }
-        }
-
-        public async Task<ResultModel<Kill>> UpdateAsync(Kill kill)
-        {
-            ResultModel<Kill> resultModel = new ResultModel<Kill>();
-            // Kills are immutable post-creation in Gotcha2's domain — fail loudly.
-            resultModel.Errors.Add("Kills cannot be updated.");
-            return await Task.FromResult(resultModel);
-        }
-
-        public async Task<ResultModel<Kill>> DeleteAsync(Guid id)
-        {
-            ResultModel<Kill> resultModel = new ResultModel<Kill>();
-
-            try
-            {
-                Kill? kill = await _dbContext.Kills.FirstOrDefaultAsync(k => k.Id == id);
-
-                if (kill == null)
-                {
-                    resultModel.Errors.Add("No kill with this id was found!");
-                    return resultModel;
-                }
-
-                _dbContext.Kills.Remove(kill);
-                await _dbContext.SaveChangesAsync();
-                resultModel.Data = kill;
-                return resultModel;
-            }
-            catch (DbUpdateException)
-            {
-                resultModel.Errors.Add("Something went wrong while trying to delete the kill!");
-                return resultModel;
-            }
-            catch (Exception)
-            {
-                resultModel.Errors.Add("An unexpected error occurred while trying to delete the kill!");
-                return resultModel;
-            }
-        }
-
-        public async Task<bool> DoesItExist(Guid id)
-        {
-            return await _dbContext.Kills.AnyAsync(k => k.Id == id);
         }
 
         #endregion
@@ -182,8 +59,9 @@ namespace Gotcha2.Core.Services.Repository
             {
                 // 1. Load the game.
                 Game? game = await _dbContext.Games
-                    .Include(g => g.Players)
-                    .FirstOrDefaultAsync(g => g.Id == gameId);
+                                                .Include(g => g.Players)
+                                                    .ThenInclude(p => p.User)
+                                                .FirstOrDefaultAsync(g => g.Id == gameId);
 
                 if (game == null)
                 {
@@ -218,12 +96,16 @@ namespace Gotcha2.Core.Services.Repository
                     return resultModel;
                 }
 
-                // 3. Find the open assignment whose Target == victim. Its Hunter is the killer.
-                TargetAssignment? hunterAssignment = await _dbContext.TargetAssignments
-                    .Include(ta => ta.Hunter)
-                    .FirstOrDefaultAsync(ta => ta.GameId == gameId
-                                            && ta.TargetId == victimPlayerId
-                                            && ta.AssignmentFinished == null);
+                // 3. Load this game's open assignments once, then pick out the two we need.
+                List<TargetAssignment> openAssignments = await _dbContext.TargetAssignments
+                                                .Include(ta => ta.Hunter)
+                                                    .ThenInclude(p => p!.User)
+                                                .Where(ta => ta.GameId == gameId && ta.AssignmentFinished == null)
+                                                .ToListAsync();
+
+                // Hunter->victim assignment: its Hunter is the killer.
+                TargetAssignment? hunterAssignment = openAssignments
+                                                .FirstOrDefault(ta => ta.TargetId == victimPlayerId);
 
                 if (hunterAssignment == null)
                 {
@@ -231,7 +113,7 @@ namespace Gotcha2.Core.Services.Repository
                     return resultModel;
                 }
 
-                Player killer = hunterAssignment.Hunter;
+                Player killer = hunterAssignment.Hunter!;
 
                 // 4. Authorise: actingUserId must be the killer's user OR the victim's user.
                 bool isKiller = killer.UserId == actingUserId;
@@ -243,11 +125,9 @@ namespace Gotcha2.Core.Services.Repository
                     return resultModel;
                 }
 
-                // 5. Find the victim's own open assignment — its Target is what the killer inherits.
-                TargetAssignment? victimAssignment = await _dbContext.TargetAssignments
-                    .FirstOrDefaultAsync(ta => ta.GameId == gameId
-                                            && ta.HunterId == victimPlayerId
-                                            && ta.AssignmentFinished == null);
+                // 5. Victim's own open assignment — its Target is what the killer inherits.
+                TargetAssignment? victimAssignment = openAssignments
+                                                .FirstOrDefault(ta => ta.HunterId == victimPlayerId);
 
                 Guid? inheritedTargetPlayerId = victimAssignment?.TargetId;
 
@@ -260,7 +140,9 @@ namespace Gotcha2.Core.Services.Repository
                 {
                     GameId = gameId,
                     KillerId = killer.Id,
+                    Killer = killer,
                     VictimId = victim.Id,
+                    Victim = victim,
                     Moment = DateTime.UtcNow
                 };
 
@@ -308,13 +190,7 @@ namespace Gotcha2.Core.Services.Repository
                 // 12. Save it all.
                 await _dbContext.SaveChangesAsync();
 
-                // Reload kill with its nav properties for mapping.
-                Kill? reloaded = await _dbContext.Kills
-                    .Include(k => k.Killer).ThenInclude(p => p.User)
-                    .Include(k => k.Victim).ThenInclude(p => p.User)
-                    .FirstOrDefaultAsync(k => k.Id == newKill.Id);
-
-                resultModel.Data = reloaded!;
+                resultModel.Data = newKill;
                 return resultModel;
             }
             catch (DbUpdateConcurrencyException)
@@ -330,6 +206,27 @@ namespace Gotcha2.Core.Services.Repository
             catch (Exception)
             {
                 resultModel.Errors.Add("An unexpected error occurred while trying to record the kill!");
+                return resultModel;
+            }
+        }
+
+        public async Task<ResultModel<int>> CountByKillerUserAsync(Guid userId)
+        {
+            ResultModel<int> resultModel = new ResultModel<int>();
+
+            try
+            {
+                resultModel.Data = await _dbContext.Kills.CountAsync(k => k.Killer!.UserId == userId);
+                return resultModel;
+            }
+            catch (TimeoutException)
+            {
+                resultModel.Errors.Add("The server timed out while trying to count the kills!");
+                return resultModel;
+            }
+            catch (Exception)
+            {
+                resultModel.Errors.Add("Something went wrong while trying to count the kills!");
                 return resultModel;
             }
         }

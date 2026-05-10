@@ -22,7 +22,7 @@ namespace Gotcha2.API.Services.Helpers.Extensions
             {
                 Id = player.Id,
                 UserId = player.UserId,
-                FirstName = player.User.FirstName,
+                FirstName = player.User!.FirstName,
                 LastName = player.User.LastName,
                 IsAlive = player.IsAlive,
                 HasProfileImage = player.User.HasProfileImage
@@ -35,11 +35,11 @@ namespace Gotcha2.API.Services.Helpers.Extensions
             {
                 Id = player.Id,
                 UserId = player.UserId,
-                FirstName = player.User.FirstName,
+                FirstName = player.User!.FirstName,
                 LastName = player.User.LastName,
                 HasProfileImage = player.User.HasProfileImage,
                 GameId = player.GameId,
-                GameName = player.Game.Name,
+                GameName = player.Game!.Name,
                 IsAlive = player.IsAlive,
                 Notes = player.Notes
             };
@@ -87,8 +87,8 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 Id = kill.Id,
                 GameId = kill.GameId,
                 Moment = kill.Moment,
-                Killer = kill.Killer.MapToPlayerSummaryDto(),
-                Victim = kill.Victim.MapToPlayerSummaryDto()
+                Killer = kill.Killer!.MapToPlayerSummaryDto(),
+                Victim = kill.Victim!.MapToPlayerSummaryDto()
             };
         }
 
@@ -98,8 +98,8 @@ namespace Gotcha2.API.Services.Helpers.Extensions
             {
                 Id = kill.Id,
                 Moment = kill.Moment,
-                Killer = kill.Killer.MapToPlayerSummaryDto(),
-                Victim = kill.Victim.MapToPlayerSummaryDto()
+                Killer = kill.Killer!.MapToPlayerSummaryDto(),
+                Victim = kill.Victim!.MapToPlayerSummaryDto()
             };
         }
 
@@ -110,8 +110,8 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 Id = assignment.Id,
                 GameId = assignment.GameId,
                 TargetAssigned = assignment.TargetAssigned,
-                Hunter = assignment.Hunter.MapToPlayerSummaryDto(),
-                Target = assignment.Target.MapToPlayerSummaryDto()
+                Hunter = assignment.Hunter!.MapToPlayerSummaryDto(),
+                Target = assignment.Target!.MapToPlayerSummaryDto()
             };
         }
     }

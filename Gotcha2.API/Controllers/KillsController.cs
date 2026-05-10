@@ -16,12 +16,12 @@ namespace Gotcha2.API.Controllers
     public class KillsController : ControllerBase
     {
         private readonly IKillRepoService _killRepo;
-        private readonly IGameRepoService _gameRepo;
+        private readonly IPlayerRepoService _playerRepo;
 
-        public KillsController(IKillRepoService killRepo, IGameRepoService gameRepo)
+        public KillsController(IKillRepoService killRepo, IPlayerRepoService playerRepo)
         {
             _killRepo = killRepo;
-            _gameRepo = gameRepo;
+            _playerRepo = playerRepo;
         }
 
         #region === GET ALL BY GAME ===
@@ -30,31 +30,23 @@ namespace Gotcha2.API.Controllers
         public async Task<IActionResult> GetByGame(Guid gameId)
         {
             // Caller must be a Player in the game.
-            ResultModel<Game> gameResult = await _gameRepo.GetByIdAsync(gameId);
-
-            if (!gameResult.IsSuccess)
-            {
-                return NotFound(gameResult.Errors);
-            }
-
             Guid currentUserId = User.GetUserId();
-            bool isInGame = gameResult.Data!.Players.Any(p => p.UserId == currentUserId);
+            ResultModel<bool> membershipResult = await _playerRepo.IsUserInGameAsync(gameId, currentUserId);
 
-            if (!isInGame)
-            {
+            if (!membershipResult.IsSuccess)
+                return BadRequest(membershipResult.Errors);
+
+            if (!membershipResult.Data)
                 return Forbid();
-            }
 
             ResultModel<List<Kill>> killsResult = await _killRepo.GetByGameAsync(gameId);
 
             if (!killsResult.IsSuccess)
-            {
                 return BadRequest(killsResult.Errors);
-            }
 
             List<KillSummaryDto> response = killsResult.Data!
-                .Select(k => k.MapToKillSummaryDto())
-                .ToList();
+                                                        .Select(k => k.MapToKillSummaryDto())
+                                                        .ToList();
 
             return Ok(response);
         }
@@ -70,9 +62,7 @@ namespace Gotcha2.API.Controllers
             ResultModel<Kill> result = await _killRepo.RecordKillAsync(gameId, dto.VictimPlayerId!.Value, currentUserId);
 
             if (!result.IsSuccess)
-            {
                 return BadRequest(result.Errors);
-            }
 
             KillResponseDto response = result.Data!.MapToResponseDto();
             return StatusCode(StatusCodes.Status201Created, response);
