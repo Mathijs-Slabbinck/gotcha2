@@ -171,6 +171,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+/* The UseExceptionHandler middleware is used to catch unhandled exceptions 
+ * and redirect the user to a specified error handling path, in this case "/error".
+ * This allows for centralized error handling and ensures that users receive a consistent error response
+ * when something goes wrong in the application.
+ * The "/error" path is handled by ErrorController, which can return a standardized error response. */
+app.UseExceptionHandler("/error");
+
 app.UseHttpsRedirection();
 
 // CORS must run BEFORE auth — preflight (OPTIONS) requests don't carry the Authorization header,
