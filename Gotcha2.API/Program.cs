@@ -3,6 +3,8 @@ using Gotcha2.API.Constants.Contracts;
 using Gotcha2.Core.Data;
 using Gotcha2.Core.Data.Seeder;
 using Gotcha2.Core.Entities.Models;
+using Gotcha2.Core.Interfaces;
+using Gotcha2.Core.Services.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -131,6 +133,12 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// === Repositories ===
+builder.Services.AddScoped<IPlayerRepoService, PlayerRepoService>();
+builder.Services.AddScoped<IGameRepoService, GameRepoService>();
+builder.Services.AddScoped<IKillRepoService, KillRepoService>();
+builder.Services.AddScoped<ITargetAssignmentRepoService, TargetAssignmentRepoService>();
+
 // === CORS ===
 string[] allowedOrigins = builder.Configuration
     .GetSection(CorsConfigKeys.AllowedOrigins)
@@ -162,6 +170,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+/* The UseExceptionHandler middleware is used to catch unhandled exceptions 
+ * and redirect the user to a specified error handling path, in this case "/error".
+ * This allows for centralized error handling and ensures that users receive a consistent error response
+ * when something goes wrong in the application.
+ * The "/error" path is handled by ErrorController, which can return a standardized error response. */
+app.UseExceptionHandler("/error");
 
 app.UseHttpsRedirection();
 

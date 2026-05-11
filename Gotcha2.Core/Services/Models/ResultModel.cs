@@ -2,6 +2,6 @@
 {
     public class ResultModel<T> : BaseResultModel
     {
-        public T Data { get; set; }
+        public T? Data { get; set; }
     }
 }

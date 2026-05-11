@@ -39,9 +39,7 @@ namespace Gotcha2.API.Controllers
             GotchaUser? existingByEmail = await _userManager.FindByEmailAsync(dto.Email);
 
             if (existingByEmail is not null)
-            {
                 return BadRequest(new[] { "A user with that email already exists." });
-            }
 
             // Identity requires UserName to be populated. Login is email-only, so we mirror Email.
             GotchaUser user = new GotchaUser
@@ -57,9 +55,7 @@ namespace Gotcha2.API.Controllers
             IdentityResult createResult = await _userManager.CreateAsync(user, dto.Password);
 
             if (!createResult.Succeeded)
-            {
                 return BadRequest(createResult.Errors.Select(e => e.Description).ToArray());
-            }
 
             IdentityResult roleResult = await _userManager.AddToRoleAsync(user, Roles.User);
 
@@ -89,16 +85,12 @@ namespace Gotcha2.API.Controllers
             GotchaUser? user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user is null)
-            {
                 // Generic message — don't leak which emails exist.
                 return Unauthorized(new[] { "Invalid email or password." });
-            }
 
             // Short-circuit BEFORE password check — otherwise a correct guess during lockout would still log in.
             if (await _userManager.IsLockedOutAsync(user))
-            {
                 return Unauthorized(new[] { "Account temporarily locked. Try again later." });
-            }
 
             bool passwordOk = await _userManager.CheckPasswordAsync(user, dto.Password);
 
@@ -125,17 +117,14 @@ namespace Gotcha2.API.Controllers
             string jwtAudience = _configuration[JwtConfigKeys.Audience]!;
 
             int expiresInMinutes;
+
             string? configValue = _configuration[JwtConfigKeys.ExpiresInMinutes];
             bool success = int.TryParse(configValue, out int parsed);
 
             if (success)
-            {
                 expiresInMinutes = parsed;
-            }
             else
-            {
                 expiresInMinutes = 60;
-            }
 
             // Guid-keyed Identity — must .ToString() the user id for both Sub and NameIdentifier
             // so ClaimsPrincipalExtensions.GetUserId() can Guid.Parse it back out.
