@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Gotcha2.API/Gotcha2.API.csproj" />
   <Project Path="Gotcha2.Core/Gotcha2.Core.csproj" />
+  <Project Path="Gotcha2.Maui/Gotcha2.Maui.csproj" Id="a6da6134-5ccd-40b7-8578-10eaf1533fee" />
 </Solution>
