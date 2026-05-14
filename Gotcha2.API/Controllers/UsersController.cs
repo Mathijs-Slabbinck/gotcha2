@@ -52,14 +52,17 @@ namespace Gotcha2.API.Controllers
                 return NotFound(new[] { "User not found." });
 
             ResultModel<int> gamesPlayedResult = await _playerRepo.CountByUserAsync(currentUserId);
+
             if (!gamesPlayedResult.IsSuccess)
                 return BadRequest(gamesPlayedResult.Errors);
 
             ResultModel<int> gamesWonResult = await _gameRepo.CountWinsByUserAsync(currentUserId);
+
             if (!gamesWonResult.IsSuccess)
                 return BadRequest(gamesWonResult.Errors);
 
             ResultModel<int> totalKillsResult = await _killRepo.CountByKillerUserAsync(currentUserId);
+
             if (!totalKillsResult.IsSuccess)
                 return BadRequest(totalKillsResult.Errors);
 
