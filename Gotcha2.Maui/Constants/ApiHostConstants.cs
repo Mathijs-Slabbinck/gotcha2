@@ -1,6 +1,6 @@
 namespace Gotcha2.Maui.Constants
 {
-    public static class ApiHost
+    public static class ApiHostConstants
     {
         // Dev PC's LAN IPv4. Phone + PC must be on the same WiFi.
         // API must bind to "*:{Port}" (see launchSettings.json) so it accepts non-loopback traffic.
