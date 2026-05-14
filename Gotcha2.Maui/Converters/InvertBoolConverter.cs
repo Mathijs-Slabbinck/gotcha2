@@ -2,6 +2,9 @@ using System.Globalization;
 
 namespace Gotcha2.Maui.Converters
 {
+    // Maui comes with a build in bool converter, but we decided to write our own since it's a small file to maintain
+    // and since we need other converters anyways, it's good to stay consistent and use our own converters for all our needs.
+
     /* Flips a bool. Used to bind IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}"
      * so form controls disable themselves while a command is running.
      * Register as a StaticResource in Resources/Styles/Converters.xaml (or App.xaml ResourceDictionary). */

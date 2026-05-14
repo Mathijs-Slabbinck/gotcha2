@@ -3,12 +3,37 @@
     x:Class="Gotcha2.Maui.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:Gotcha2.Maui"
-    Title="Gotcha2.Maui">
+    xmlns:unauthenticated="clr-namespace:Gotcha2.Maui.Pages.Unauthenticated"
+    xmlns:authenticated="clr-namespace:Gotcha2.Maui.Pages.Authenticated"
+    Shell.FlyoutBehavior="Disabled"
+    Title="Gotcha2">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <!-- Unauthenticated TabBar — startup tab bar. SessionService.SwitchToAuthenticatedTabBar()
+         navigates to "//Home" which makes Shell switch to the Authenticated TabBar below. -->
+    <TabBar>
+        <Tab Title="Sign In" Route="SignIn">
+            <ShellContent ContentTemplate="{DataTemplate unauthenticated:SignIn}" />
+        </Tab>
+        <Tab Title="Sign Up" Route="SignUp">
+            <ShellContent ContentTemplate="{DataTemplate unauthenticated:SignUp}" />
+        </Tab>
+        <Tab Title="Info" Route="Info">
+            <ShellContent ContentTemplate="{DataTemplate unauthenticated:Info}" />
+        </Tab>
+    </TabBar>
+
+    <!-- Authenticated TabBar — SessionService.SignOutAsync() navigates back to "//SignIn"
+         which makes Shell swap back to the Unauthenticated TabBar above. -->
+    <TabBar>
+        <Tab Title="Home" Route="Home">
+            <ShellContent ContentTemplate="{DataTemplate authenticated:Home}" />
+        </Tab>
+        <Tab Title="Games" Route="Games">
+            <ShellContent ContentTemplate="{DataTemplate authenticated:Games}" />
+        </Tab>
+        <Tab Title="Settings" Route="Settings">
+            <ShellContent ContentTemplate="{DataTemplate authenticated:Settings}" />
+        </Tab>
+    </TabBar>
 
 </Shell>
