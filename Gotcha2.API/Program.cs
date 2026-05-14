@@ -1,7 +1,6 @@
 using System.Text;
 using Gotcha2.API.Constants.Contracts;
 using Gotcha2.Core.Data;
-using Gotcha2.Core.Data.Seeder;
 using Gotcha2.Core.Entities.Models;
 using Gotcha2.Core.Interfaces;
 using Gotcha2.Core.Services.Repository;
@@ -156,14 +155,6 @@ builder.Services.AddCors(options =>
 });
 
 WebApplication app = builder.Build();
-
-// === Role seed (must run before any registration) ===
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    RoleManager<IdentityRole<Guid>> roleManager =
-        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await Seeder.SeedRolesAsync(roleManager);
-}
 
 if (app.Environment.IsDevelopment())
 {

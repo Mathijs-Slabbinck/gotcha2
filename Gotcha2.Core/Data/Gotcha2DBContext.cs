@@ -18,6 +18,8 @@ namespace Gotcha2.Core.Data
         {
             base.OnModelCreating(builder);
 
+            Seeder.Seeder.Seed(builder);
+
             // Player -> GotchaUser (one user can have many player accounts, one per game)
             builder.Entity<Player>()
                 .HasOne(p => p.User)
