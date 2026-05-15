@@ -164,6 +164,44 @@ namespace Gotcha2.Maui.Services.Api
             }
         }
 
+        public async Task<BaseResultModel> StartAsync(Guid gameId)
+        {
+            BaseResultModel result = new BaseResultModel();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.PostAsync($"api/games/{gameId}/start", content: null);
+
+                if (response.IsSuccessStatusCode)
+                    return result;
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiGameService.StartAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
         private static GameItem ToGameItem(GameSummaryDto dto, Guid currentUserId)
         {
             return new GameItem

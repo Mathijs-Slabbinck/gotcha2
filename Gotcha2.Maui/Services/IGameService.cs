@@ -9,5 +9,6 @@ namespace Gotcha2.Maui.Services
         Task<ResultModel<List<GameItem>>> GetAllAsync();
         Task<ResultModel<GameItem>> CreateAsync(GameRequestDto request);
         Task<BaseResultModel> JoinAsync(Guid gameId);
+        Task<BaseResultModel> StartAsync(Guid gameId);
     }
 }
