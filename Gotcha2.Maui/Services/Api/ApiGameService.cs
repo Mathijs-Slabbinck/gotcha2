@@ -296,12 +296,73 @@ namespace Gotcha2.Maui.Services.Api
             }
         }
 
+        public async Task<ResultModel<KillItem>> RecordKillAsync(Guid gameId, KillRequestDto request)
+        {
+            ResultModel<KillItem> result = new ResultModel<KillItem>();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/games/{gameId}/kills", request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    KillResponseDto? data = await response.Content.ReadFromJsonAsync<KillResponseDto>();
+
+                    if (data is null)
+                    {
+                        result.Errors.Add("Empty response from server.");
+                        return result;
+                    }
+
+                    result.Data = ToKillItem(data);
+                    return result;
+                }
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiGameService.RecordKillAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
         private static KillItem ToKillItem(KillSummaryDto dto, Guid gameId)
         {
             return new KillItem
             {
                 KillId = dto.Id,
                 GameId = gameId,
+                MomentText = dto.Moment.ToString("dd MMM yyyy HH:mm"),
+                KillerDisplayName = $"{dto.Killer.FirstName} {dto.Killer.LastName}",
+                VictimDisplayName = $"{dto.Victim.FirstName} {dto.Victim.LastName}"
+            };
+        }
+
+        private static KillItem ToKillItem(KillResponseDto dto)
+        {
+            return new KillItem
+            {
+                KillId = dto.Id,
+                GameId = dto.GameId,
                 MomentText = dto.Moment.ToString("dd MMM yyyy HH:mm"),
                 KillerDisplayName = $"{dto.Killer.FirstName} {dto.Killer.LastName}",
                 VictimDisplayName = $"{dto.Victim.FirstName} {dto.Victim.LastName}"

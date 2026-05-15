@@ -64,8 +64,8 @@ namespace Gotcha2.Maui
 
             // === Services (Phase 7) ===
             builder.Services.AddTransient<IAuthService, ApiAuthService>();
+            builder.Services.AddTransient<IGameService, ApiGameService>();
             // Remaining Api*Service impls don't exist yet — uncomment as they land:
-            // builder.Services.AddTransient<IGameService, ApiGameService>();
             // builder.Services.AddTransient<IPlayerService, ApiPlayerService>();
             // builder.Services.AddTransient<IUserService, ApiUserService>();
 
