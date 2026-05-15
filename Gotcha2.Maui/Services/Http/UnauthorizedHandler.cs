@@ -24,7 +24,7 @@ namespace Gotcha2.Maui.Services.Http
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
 
             if (response.StatusCode == HttpStatusCode.Unauthorized && requestHadToken)
-                await MainThread.InvokeOnMainThreadAsync(async () => await _sessionService.SignOutAsync());
+                await _sessionService.SignOutAsync();
 
             return response;
         }

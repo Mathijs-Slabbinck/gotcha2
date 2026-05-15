@@ -42,10 +42,11 @@ namespace Gotcha2.Maui.Services
             await SecureStorage.SetAsync(UserIdKey, userId.ToString());
         }
 
-        /* Reads a previously-persisted token + user id from SecureStorage and populates the in-memory state.
-         * Returns true if a valid session was restored; false if no session was stored or the stored values are invalid.
-         * Does NOT navigate — caller (App.OnStart) decides whether to switch to the authenticated TabBar. */
-        public async Task<bool> TryRestoreAsync()
+        /* Reads a previously-persisted token + user id from SecureStorage, populates in-memory state,
+         * and switches to the Authenticated TabBar. Returns true if a valid session was resumed;
+         * false if nothing was stored or the stored values were invalid.
+         * Self-marshals the nav call to the UI thread — callers can just await. */
+        public async Task<bool> TryResumeAsync()
         {
             string? token = await SecureStorage.GetAsync(TokenKey);
             string? userIdRaw = await SecureStorage.GetAsync(UserIdKey);
@@ -58,16 +59,19 @@ namespace Gotcha2.Maui.Services
 
             BeginSession(userId, token);
 
+            await MainThread.InvokeOnMainThreadAsync(SwitchToAuthenticatedTabBarAsync);
+
             return true;
         }
 
-        // Switches Shell to the Authenticated TabBar (Home tab).
-        public void SwitchToAuthenticatedTabBar()
+        // Switches Shell to the Authenticated TabBar (Home tab). Must run on the UI thread.
+        public async Task SwitchToAuthenticatedTabBarAsync()
         {
-            Shell.Current.GoToAsync(RoutesConstants.Home);
+            await Shell.Current.GoToAsync(RoutesConstants.Home);
         }
 
-        // Clears in-memory state + SecureStorage, then returns to the Unauthenticated TabBar.
+        /* Clears in-memory state + SecureStorage, then returns to the Unauthenticated TabBar.
+         * Self-marshals the nav call to the UI thread — callers can just await. */
         public async Task SignOutAsync()
         {
             _currentUserId = null;
@@ -76,7 +80,7 @@ namespace Gotcha2.Maui.Services
             SecureStorage.Remove(TokenKey);
             SecureStorage.Remove(UserIdKey);
 
-            await Shell.Current.GoToAsync(RoutesConstants.SignIn);
+            await MainThread.InvokeOnMainThreadAsync(async () => await Shell.Current.GoToAsync(RoutesConstants.SignIn));
         }
     }
 }
