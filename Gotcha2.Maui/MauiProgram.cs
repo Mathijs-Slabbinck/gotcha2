@@ -1,6 +1,7 @@
 using CommunityToolkit.Maui;
 using Gotcha2.Maui.Constants;
 using Gotcha2.Maui.Services;
+using Gotcha2.Maui.Services.Api;
 using Gotcha2.Maui.Services.Http;
 using Microsoft.Extensions.Logging;
 
@@ -62,8 +63,8 @@ namespace Gotcha2.Maui
             .AddHttpMessageHandler<UnauthorizedHandler>();
 
             // === Services (Phase 7) ===
-            // Api*Service impls don't exist yet — uncomment as they land:
-            // builder.Services.AddTransient<IAuthService, ApiAuthService>();
+            builder.Services.AddTransient<IAuthService, ApiAuthService>();
+            // Remaining Api*Service impls don't exist yet — uncomment as they land:
             // builder.Services.AddTransient<IGameService, ApiGameService>();
             // builder.Services.AddTransient<IPlayerService, ApiPlayerService>();
             // builder.Services.AddTransient<IUserService, ApiUserService>();

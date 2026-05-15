@@ -1,10 +1,12 @@
 namespace Gotcha2.API.Dtos.Authentication.Response
 {
-    // Used in: AuthController
+    /* Used in: AuthController
     // For: Register, Login, GenerateTokenAsync
-    // What the API sends back when a user successfully authenticates (login or register).
-    // The client stores the token (e.g. in localStorage / a Postman variable) and
-    // sends it on every subsequent request as `Authorization: Bearer <token>`.
+
+    /* --- comment ---
+    What the API sends back when a user successfully authenticates (login or register).
+     * The client stores the token (e.g. in localStorage / a Postman variable) and
+     * sends it on every subsequent request as `Authorization: Bearer <token>`. */
     public class AuthResponseDto
     {
         public required Guid UserId { get; init; }

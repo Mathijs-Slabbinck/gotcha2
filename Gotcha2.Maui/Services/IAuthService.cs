@@ -1,6 +1,12 @@
-namespace Gotcha2.Maui.Services;
+using Gotcha2.Maui.Models.Dtos.Request;
+using Gotcha2.Maui.Models.Dtos.Response;
+using Gotcha2.Maui.Models.Result;
 
-public interface IAuthService
+namespace Gotcha2.Maui.Services
 {
-    // TODO: define members after ApiAuthService is implemented.
+    public interface IAuthService
+    {
+        Task<ResultModel<AuthResponseDto>> SignInAsync(string email, string password);
+        Task<ResultModel<AuthResponseDto>> RegisterAsync(RegisterRequestDto request);
+    }
 }

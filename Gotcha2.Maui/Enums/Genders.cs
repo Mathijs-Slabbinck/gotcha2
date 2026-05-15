@@ -1,4 +1,4 @@
-namespace Gotcha2.Core.Enums
+namespace Gotcha2.Maui.Enums
 {
     public enum Genders
     {
