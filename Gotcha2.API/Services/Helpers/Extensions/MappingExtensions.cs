@@ -63,7 +63,7 @@ namespace Gotcha2.API.Services.Helpers.Extensions
             };
         }
 
-        public static GameSummaryDto MapToGameSummaryDto(this Game game)
+        public static GameSummaryDto MapToGameSummaryDto(this Game game, Guid currentUserId)
         {
             return new GameSummaryDto
             {
@@ -76,7 +76,9 @@ namespace Gotcha2.API.Services.Helpers.Extensions
                 IsFinished = game.IsFinished,
                 WinnerId = game.WinnerId,
                 CreatorId = game.CreatorId,
-                PlayerCount = game.Players.Count
+                PlayerCount = game.Players.Count,
+                KillCount = game.Kills.Count,
+                CurrentUserPlayerId = game.Players.FirstOrDefault(p => p.UserId == currentUserId)?.Id
             };
         }
 

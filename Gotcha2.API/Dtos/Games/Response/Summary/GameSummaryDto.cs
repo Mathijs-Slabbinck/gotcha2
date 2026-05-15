@@ -14,5 +14,7 @@ namespace Gotcha2.API.Dtos.Games.Response.Summary
         public required Guid? WinnerId { get; init; }
         public required Guid CreatorId { get; init; }
         public required int PlayerCount { get; init; }
+        public required int KillCount { get; init; }
+        public required Guid? CurrentUserPlayerId { get; init; }
     }
 }

@@ -34,7 +34,7 @@ namespace Gotcha2.API.Controllers
                 return BadRequest(result.Errors);
 
             List<GameSummaryDto> response = result.Data!
-                                                    .Select(g => g.MapToGameSummaryDto())
+                                                    .Select(g => g.MapToGameSummaryDto(currentUserId))
                                                     .ToList();
 
             return Ok(response);
