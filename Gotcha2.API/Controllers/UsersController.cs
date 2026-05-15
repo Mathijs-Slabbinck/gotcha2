@@ -115,6 +115,9 @@ namespace Gotcha2.API.Controllers
 
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
+            // DTO nullables are guaranteed non-null here — [Required] is checked by [ApiController] before the action runs.
+            user.BirthDate = dto.BirthDate!.Value;
+            user.Gender = dto.Gender!.Value;
 
             IdentityResult updateResult = await _userManager.UpdateAsync(user);
 

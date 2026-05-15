@@ -1,6 +1,13 @@
-namespace Gotcha2.Maui.Services;
+using Gotcha2.Maui.Models.Dtos.Request;
+using Gotcha2.Maui.Models.Items;
+using Gotcha2.Maui.Models.Result;
 
-public interface IUserService
+namespace Gotcha2.Maui.Services
 {
-    // TODO: define members after ApiUserService is implemented.
+    public interface IUserService
+    {
+        Task<ResultModel<UserItem>> GetMeAsync();
+        Task<ResultModel<UserItem>> UpdateMeAsync(UserUpdateRequestDto request);
+        Task<BaseResultModel> ChangePasswordAsync(ChangePasswordRequestDto request);
+    }
 }
