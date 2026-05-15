@@ -1,6 +1,5 @@
 namespace Gotcha2.Maui.Models.Dtos.Response
 {
-    // Wire mirror of Gotcha2.API/Dtos/Players/Response/Summary/PlayerSummaryDto.cs.
     // Embedded inside GameResponseDto.Players, KillSummaryDto, KillResponseDto.
     public class PlayerSummaryDto
     {

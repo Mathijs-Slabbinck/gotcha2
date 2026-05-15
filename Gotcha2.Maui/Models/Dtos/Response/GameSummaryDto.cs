@@ -1,6 +1,5 @@
 namespace Gotcha2.Maui.Models.Dtos.Response
 {
-    // Wire mirror of Gotcha2.API/Dtos/Games/Response/Summary/GameSummaryDto.cs.
     // Consumed by ApiGameService.GetAllAsync and mapped to GameItem for the UI.
     public class GameSummaryDto
     {

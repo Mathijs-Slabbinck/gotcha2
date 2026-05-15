@@ -1,6 +1,5 @@
 namespace Gotcha2.Maui.Models.Dtos.Response
 {
-    // Wire mirror of Gotcha2.API/Dtos/Games/Response/GameResponseDto.cs.
     // Returned by POST /api/games, GET /api/games/{id}, and (currently unused MAUI-side)
     // join/start/update endpoints. ApiGameService maps it to GameItem for UI consumption.
     public class GameResponseDto

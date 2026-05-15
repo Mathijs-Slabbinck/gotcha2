@@ -11,5 +11,6 @@ namespace Gotcha2.Maui.Services
         Task<BaseResultModel> JoinAsync(Guid gameId);
         Task<BaseResultModel> StartAsync(Guid gameId);
         Task<BaseResultModel> LeaveAsync(Guid playerId);
+        Task<ResultModel<List<KillItem>>> GetKillsAsync(Guid gameId);
     }
 }

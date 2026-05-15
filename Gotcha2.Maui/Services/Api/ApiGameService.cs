@@ -240,6 +240,74 @@ namespace Gotcha2.Maui.Services.Api
             }
         }
 
+        public async Task<ResultModel<List<KillItem>>> GetKillsAsync(Guid gameId)
+        {
+            ResultModel<List<KillItem>> result = new ResultModel<List<KillItem>>();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync($"api/games/{gameId}/kills");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    List<KillSummaryDto>? data = await response.Content.ReadFromJsonAsync<List<KillSummaryDto>>();
+
+                    if (data is null)
+                    {
+                        result.Errors.Add("Empty response from server.");
+                        return result;
+                    }
+
+                    List<KillItem> items = new List<KillItem>();
+
+                    foreach (KillSummaryDto dto in data)
+                    {
+                        items.Add(ToKillItem(dto, gameId));
+                    }
+
+                    result.Data = items;
+                    return result;
+                }
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiGameService.GetKillsAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
+        private static KillItem ToKillItem(KillSummaryDto dto, Guid gameId)
+        {
+            return new KillItem
+            {
+                KillId = dto.Id,
+                GameId = gameId,
+                MomentText = dto.Moment.ToString("dd MMM yyyy HH:mm"),
+                KillerDisplayName = $"{dto.Killer.FirstName} {dto.Killer.LastName}",
+                VictimDisplayName = $"{dto.Victim.FirstName} {dto.Victim.LastName}"
+            };
+        }
+
         private static GameItem ToGameItem(GameSummaryDto dto, Guid currentUserId)
         {
             return new GameItem
