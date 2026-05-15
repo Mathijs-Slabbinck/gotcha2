@@ -1,6 +1,13 @@
-namespace Gotcha2.Maui.Services;
+using Gotcha2.Maui.Models.Dtos.Request;
+using Gotcha2.Maui.Models.Items;
+using Gotcha2.Maui.Models.Result;
 
-public interface IGameService
+namespace Gotcha2.Maui.Services
 {
-    // TODO: define members after ApiGameService is implemented.
+    public interface IGameService
+    {
+        Task<ResultModel<List<GameItem>>> GetAllAsync();
+        Task<ResultModel<GameItem>> CreateAsync(GameRequestDto request);
+        Task<BaseResultModel> JoinAsync(Guid gameId);
+    }
 }
