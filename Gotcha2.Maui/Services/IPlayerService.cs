@@ -1,6 +1,10 @@
-namespace Gotcha2.Maui.Services;
+using Gotcha2.Maui.Models.Items;
+using Gotcha2.Maui.Models.Result;
 
-public interface IPlayerService
+namespace Gotcha2.Maui.Services
 {
-    // TODO: define members after ApiPlayerService is implemented.
+    public interface IPlayerService
+    {
+        Task<ResultModel<List<PlayerItem>>> GetByGameAsync(Guid gameId);
+    }
 }
