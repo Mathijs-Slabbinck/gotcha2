@@ -6,16 +6,13 @@ namespace Gotcha2.Maui.Converters
     // and since we need other converters anyways, it's good to stay consistent and use our own converters for all our needs.
 
     /* Flips a bool. Used to bind IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}"
-     * so form controls disable themselves while a command is running.
-     * Register as a StaticResource in Resources/Styles/Converters.xaml (or App.xaml ResourceDictionary). */
+     * so form controls disable themselves while a command is running. */
     public class InvertBoolConverter : IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is bool b)
-            {
                 return !b;
-            }
 
             return false;
         }
@@ -23,9 +20,7 @@ namespace Gotcha2.Maui.Converters
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is bool b)
-            {
                 return !b;
-            }
 
             return false;
         }
