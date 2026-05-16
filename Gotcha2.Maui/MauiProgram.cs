@@ -3,6 +3,7 @@ using Gotcha2.Maui.Constants;
 using Gotcha2.Maui.Services;
 using Gotcha2.Maui.Services.Api;
 using Gotcha2.Maui.Services.Http;
+using Gotcha2.Maui.ViewModels;
 using Microsoft.Extensions.Logging;
 
 using SignIn = Gotcha2.Maui.Pages.Unauthenticated.SignIn;
@@ -77,7 +78,7 @@ namespace Gotcha2.Maui
 
             // === ViewModels (Phase 6) ===
             // Transient — fresh state per navigation. Uncomment as VMs land:
-            // builder.Services.AddTransient<SignInViewModel>();
+            builder.Services.AddTransient<SignInViewModel>();
             // builder.Services.AddTransient<SignUpViewModel>();
             // builder.Services.AddTransient<HomeViewModel>();
             // builder.Services.AddTransient<GamesViewModel>();
