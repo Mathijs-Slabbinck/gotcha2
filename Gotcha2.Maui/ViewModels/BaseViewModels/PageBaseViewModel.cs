@@ -7,19 +7,19 @@ namespace Gotcha2.Maui.ViewModels.BaseViewModels
     // them during async work, and surface ErrorMessage in a styled label.
     public abstract class PageBaseViewModel : ObservableObject
     {
-        private bool _isBusy;
-        private string _errorMessage = string.Empty;
+        private bool isBusy;
+        private string errorMessage = string.Empty;
 
         public bool IsBusy
         {
-            get { return _isBusy; }
-            set { SetProperty(ref _isBusy, value); }
+            get { return isBusy; }
+            set { SetProperty(ref isBusy, value); }
         }
 
         public string ErrorMessage
         {
-            get { return _errorMessage; }
-            set { SetProperty(ref _errorMessage, value); }
+            get { return errorMessage; }
+            set { SetProperty(ref errorMessage, value); }
         }
     }
 }
