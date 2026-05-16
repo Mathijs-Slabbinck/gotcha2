@@ -7,22 +7,22 @@ namespace Gotcha2.Maui.Services
         private const string TokenKey = "auth_token";
         private const string UserIdKey = "user_id";
 
-        private Guid? _currentUserId;
-        private string? _currentAuthToken;
+        private Guid? currentUserId;
+        private string? currentAuthToken;
 
         public Guid? CurrentUserId
         {
-            get { return _currentUserId; }
+            get { return currentUserId; }
         }
 
         public string? CurrentAuthToken
         {
-            get { return _currentAuthToken; }
+            get { return currentAuthToken; }
         }
 
         public bool IsSignedIn
         {
-            get { return _currentUserId.HasValue && !string.IsNullOrEmpty(_currentAuthToken); }
+            get { return currentUserId.HasValue && !string.IsNullOrEmpty(currentAuthToken); }
         }
 
         /* Populates in-memory session state.
@@ -30,8 +30,8 @@ namespace Gotcha2.Maui.Services
          * Does NOT persist — caller decides via PersistAsync whether to remember across launches. */
         public void BeginSession(Guid userId, string token)
         {
-            _currentUserId = userId;
-            _currentAuthToken = token;
+            currentUserId = userId;
+            currentAuthToken = token;
         }
 
         // Writes the token + user id to platform-encoded SecureStorage so the user
@@ -74,8 +74,8 @@ namespace Gotcha2.Maui.Services
          * Self-marshals the nav call to the UI thread — callers can just await. */
         public async Task SignOutAsync()
         {
-            _currentUserId = null;
-            _currentAuthToken = null;
+            currentUserId = null;
+            currentAuthToken = null;
 
             SecureStorage.Remove(TokenKey);
             SecureStorage.Remove(UserIdKey);
