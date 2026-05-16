@@ -1,8 +1,11 @@
 using CommunityToolkit.Maui;
+using FluentValidation;
 using Gotcha2.Maui.Constants;
+using Gotcha2.Maui.Models.Forms;
 using Gotcha2.Maui.Services;
 using Gotcha2.Maui.Services.Api;
 using Gotcha2.Maui.Services.Http;
+using Gotcha2.Maui.Validators;
 using Gotcha2.Maui.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -79,7 +82,7 @@ namespace Gotcha2.Maui
             // === ViewModels (Phase 6) ===
             // Transient — fresh state per navigation. Uncomment as VMs land:
             builder.Services.AddTransient<SignInViewModel>();
-            // builder.Services.AddTransient<SignUpViewModel>();
+            builder.Services.AddTransient<SignUpViewModel>();
             // builder.Services.AddTransient<HomeViewModel>();
             // builder.Services.AddTransient<GamesViewModel>();
             // builder.Services.AddTransient<NewGameViewModel>();
@@ -87,6 +90,10 @@ namespace Gotcha2.Maui
             // builder.Services.AddTransient<PlayerHomeViewModel>();
             // builder.Services.AddTransient<ConfirmKillViewModel>();
             // builder.Services.AddTransient<MatchResultViewModel>();
+
+            // === Validators (Phase 9) ===
+            // Transient — stateless rule definitions; one instance per VM injection.
+            builder.Services.AddTransient<IValidator<SignUpData>, SignUpValidator>();
 
             // === Pages ===
             // Transient — DI resolves and injects the VM (once VMs are wired in Phase 6).
