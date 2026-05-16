@@ -17,14 +17,36 @@ namespace Gotcha2.Maui.ViewModels
         public string Email
         {
             get { return email; }
-            set { SetProperty(ref email, value); }
+            set
+            {
+                SetProperty(ref email, value);
+                EmailError = string.Empty;
+            }
+        }
+
+        private string emailError = string.Empty;
+        public string EmailError
+        {
+            get { return emailError; }
+            set { SetProperty(ref emailError, value); }
         }
 
         private string password = string.Empty;
         public string Password
         {
             get { return password; }
-            set { SetProperty(ref password, value); }
+            set
+            {
+                SetProperty(ref password, value);
+                PasswordError = string.Empty;
+            }
+        }
+
+        private string passwordError = string.Empty;
+        public string PasswordError
+        {
+            get { return passwordError; }
+            set { SetProperty(ref passwordError, value); }
         }
 
         private bool rememberMe;
@@ -60,13 +82,16 @@ namespace Gotcha2.Maui.ViewModels
         {
             try
             {
-                Errors = new List<string>();
+                ResetErrors();
 
-                if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-                {
-                    Errors = new List<string> { "Please fill in all fields." };
+                if (string.IsNullOrWhiteSpace(Email))
+                    EmailError = "Email is required.";
+
+                if (string.IsNullOrWhiteSpace(Password))
+                    PasswordError = "Password is required.";
+
+                if (!string.IsNullOrEmpty(EmailError) || !string.IsNullOrEmpty(PasswordError))
                     return;
-                }
 
                 IsBusy = true;
 
@@ -109,6 +134,16 @@ namespace Gotcha2.Maui.ViewModels
             {
                 Errors = new List<string> { "Something went wrong. Please try again." };
             }
+        }
+
+        private void ResetErrors()
+        {
+            // Clear field-specific errors from previous attempts.
+            EmailError = string.Empty;
+            PasswordError = string.Empty;
+
+            // Clear API errors from previous attempts.
+            Errors = new List<string>();
         }
     }
 }

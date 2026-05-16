@@ -13,7 +13,6 @@ namespace Gotcha2.Maui.Converters
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             // string → bool
-
             if (value is string s && !string.IsNullOrEmpty(s))
                 return true;
 
