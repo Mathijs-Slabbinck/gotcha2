@@ -6,5 +6,6 @@
 
     <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
     <converters:PasswordVisibilityIconConverter x:Key="PasswordVisibilityIconConverter" />
+    <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
 
 </ResourceDictionary>
