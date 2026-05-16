@@ -34,8 +34,11 @@ namespace Gotcha2.Maui
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");    // used by: default Button style (template)
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");  // used by: (none yet)
+                    fonts.AddFont("Bungee-Regular.ttf", "Bungee");               // used by: SignIn (title)
+                    fonts.AddFont("RobotoSlab-Regular.ttf", "RobotoSlab");       // used by: SignIn (card header, CTA card header)
+                    fonts.AddFont("RobotoSlab-Bold.ttf", "RobotoSlabBold");      // used by: (none yet)
                 });
 
 #if DEBUG
