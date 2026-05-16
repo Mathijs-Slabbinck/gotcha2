@@ -1,9 +1,369 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             x:DataType="viewmodels:SignUpViewModel"
              x:Class="Gotcha2.Maui.Pages.Unauthenticated.SignUp"
-             Title="Sign Up">
-    <Label Text="SignUp — stub. Phase 6 fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="Sign Up"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" VerticalOptions="Center" Padding="0,30,0,0">
+
+            <!-- Title -->
+            <Label Text="JOIN GOTCHA!"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   FontFamily="Bungee"
+                   Margin="0,0,0,25" />
+
+            <!-- Sign Up card -->
+            <Border BackgroundColor="{StaticResource CardBackground}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Margin="20,0"
+                    Padding="0">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource PrimaryBrush}"
+                            Offset="0,0"
+                            Radius="20"
+                            Opacity="0.4" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Card header -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12,12,0,0"
+                            Padding="0,14">
+                        <Label Text="SIGN UP"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource Gray200}"
+                             HorizontalOptions="Fill" />
+
+                    <!-- Form content -->
+                    <VerticalStackLayout Padding="30,20" Spacing="5">
+
+                        <!-- First name -->
+                        <Label Text="First name:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Entry Text="{Binding FirstName}"
+                                   Placeholder="John"
+                                   HorizontalTextAlignment="Center"
+                                   MaxLength="100"
+                                   ReturnType="Next"
+                                   TextColor="{StaticResource Gray900}"
+                                   PlaceholderColor="{StaticResource Gray400}"
+                                   BackgroundColor="Transparent"
+                                   AutomationId="FirstNameEntry" />
+                        </Border>
+                        <Label Text="{Binding FirstNameError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding FirstNameError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="FirstNameErrorLabel" />
+
+                        <!-- Last name -->
+                        <Label Text="Last name:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Entry Text="{Binding LastName}"
+                                   Placeholder="Doe"
+                                   HorizontalTextAlignment="Center"
+                                   MaxLength="100"
+                                   ReturnType="Next"
+                                   TextColor="{StaticResource Gray900}"
+                                   PlaceholderColor="{StaticResource Gray400}"
+                                   BackgroundColor="Transparent"
+                                   AutomationId="LastNameEntry" />
+                        </Border>
+                        <Label Text="{Binding LastNameError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding LastNameError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="LastNameErrorLabel" />
+
+                        <!-- Email -->
+                        <Label Text="Email:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Entry Text="{Binding Email}"
+                                   Placeholder="john.doe@example.com"
+                                   Keyboard="Email"
+                                   HorizontalTextAlignment="Center"
+                                   MaxLength="254"
+                                   ReturnType="Next"
+                                   TextColor="{StaticResource Gray900}"
+                                   PlaceholderColor="{StaticResource Gray400}"
+                                   BackgroundColor="Transparent"
+                                   AutomationId="EmailEntry" />
+                        </Border>
+                        <Label Text="{Binding EmailError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="EmailErrorLabel" />
+
+                        <!-- Gender -->
+                        <Label Text="Gender:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Picker Title="Select gender"
+                                    ItemsSource="{Binding GenderOptions}"
+                                    SelectedItem="{Binding SelectedGender}"
+                                    HorizontalTextAlignment="Center"
+                                    TextColor="{StaticResource Gray900}"
+                                    TitleColor="{StaticResource Gray400}"
+                                    BackgroundColor="Transparent"
+                                    AutomationId="GenderPicker" />
+                        </Border>
+                        <Label Text="{Binding GenderError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding GenderError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="GenderErrorLabel" />
+
+                        <!-- Birthday -->
+                        <Label Text="Birthday:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <DatePicker Date="{Binding BirthDate}"
+                                        Format="yyyy-MM-dd"
+                                        HorizontalOptions="Center"
+                                        TextColor="{StaticResource Gray900}"
+                                        BackgroundColor="Transparent"
+                                        AutomationId="BirthDatePicker" />
+                        </Border>
+                        <Label Text="{Binding BirthDateError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding BirthDateError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="BirthDateErrorLabel" />
+
+                        <!-- Password -->
+                        <Label Text="Password:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry Grid.Column="0"
+                                       Text="{Binding Password}"
+                                       Placeholder="password"
+                                       IsPassword="{Binding IsPasswordVisible, Converter={StaticResource InvertBoolConverter}}"
+                                       HorizontalTextAlignment="Center"
+                                       MaxLength="128"
+                                       ReturnType="Next"
+                                       TextColor="{StaticResource Gray900}"
+                                       PlaceholderColor="{StaticResource Gray400}"
+                                       BackgroundColor="Transparent"
+                                       AutomationId="PasswordEntry" />
+                                <ImageButton Grid.Column="1"
+                                             Command="{Binding TogglePasswordVisibilityCommand}"
+                                             Source="{Binding IsPasswordVisible, Converter={StaticResource PasswordVisibilityIconConverter}}"
+                                             WidthRequest="44"
+                                             HeightRequest="44"
+                                             BackgroundColor="Transparent"
+                                             Padding="8"
+                                             AutomationId="TogglePasswordButton"
+                                             SemanticProperties.Description="Toggle password visibility" />
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding PasswordError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding PasswordError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="PasswordErrorLabel" />
+
+                        <!-- Confirm password -->
+                        <Label Text="Confirm password:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,15,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry Grid.Column="0"
+                                       Text="{Binding ConfirmPassword}"
+                                       Placeholder="repeat password"
+                                       IsPassword="{Binding IsConfirmPasswordVisible, Converter={StaticResource InvertBoolConverter}}"
+                                       HorizontalTextAlignment="Center"
+                                       MaxLength="128"
+                                       ReturnType="Done"
+                                       TextColor="{StaticResource Gray900}"
+                                       PlaceholderColor="{StaticResource Gray400}"
+                                       BackgroundColor="Transparent"
+                                       AutomationId="ConfirmPasswordEntry" />
+                                <ImageButton Grid.Column="1"
+                                             Command="{Binding ToggleConfirmPasswordVisibilityCommand}"
+                                             Source="{Binding IsConfirmPasswordVisible, Converter={StaticResource PasswordVisibilityIconConverter}}"
+                                             WidthRequest="44"
+                                             HeightRequest="44"
+                                             BackgroundColor="Transparent"
+                                             Padding="8"
+                                             AutomationId="ToggleConfirmPasswordButton"
+                                             SemanticProperties.Description="Toggle confirm password visibility" />
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding ConfirmPasswordError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding ConfirmPasswordError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="ConfirmPasswordErrorLabel" />
+
+                        <!-- Profile image (inert — Phase 8 wires MediaPicker + upload) -->
+                        <Label Text="Profile image (optional):"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,20,0,5" />
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                            <Button Text="Take photo"
+                                    Command="{Binding TakePhotoCommand}"
+                                    WidthRequest="140"
+                                    AutomationId="TakePhotoButton" />
+                            <Button Text="Choose from gallery"
+                                    Command="{Binding ChoosePhotoCommand}"
+                                    WidthRequest="180"
+                                    AutomationId="ChoosePhotoButton" />
+                        </HorizontalStackLayout>
+
+                        <!-- Remember me -->
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0,15,0,0">
+                            <CheckBox IsChecked="{Binding RememberMe}"
+                                      VerticalOptions="Center"
+                                      Color="{StaticResource Primary}"
+                                      AutomationId="RememberMeCheckBox" />
+                            <Label Text="Remember me" VerticalOptions="Center" TextColor="{StaticResource Gray600}" />
+                        </HorizontalStackLayout>
+
+                        <!-- Shared API errors -->
+                        <Label Text="{Binding ErrorText}"
+                               TextColor="{StaticResource Danger}"
+                               HorizontalTextAlignment="Center"
+                               IsVisible="{Binding HasErrors}"
+                               Margin="0,10,0,0"
+                               AutomationId="ErrorMessageLabel" />
+
+                        <!-- Sign Up -->
+                        <Button Text="Sign Up"
+                                Command="{Binding SignUpCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                HorizontalOptions="Center"
+                                WidthRequest="220"
+                                Margin="0,15,0,0"
+                                AutomationId="SignUpButton" />
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Sign In CTA -->
+            <Border BackgroundColor="{StaticResource Tertiary}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    Margin="20,25,20,30"
+                    Padding="25,20">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="ALREADY A PLAYER?"
+                           TextColor="White"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           FontFamily="RobotoSlab"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="If you already have an account, sign in instead."
+                           TextColor="White"
+                           FontAttributes="Bold"
+                           FontSize="14"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,10,0,0" />
+                    <Button Text="Sign In"
+                            Style="{StaticResource SecondaryButton}"
+                            HorizontalOptions="Center"
+                            WidthRequest="220"
+                            Margin="0,10,0,0"
+                            Command="{Binding SignInCommand}"
+                            AutomationId="SignInButton" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
