@@ -8,23 +8,29 @@ namespace Gotcha2.Maui.Converters
      * One-way only: the reverse direction would require an arbitrary string→bool lookup table. */
     public class PasswordVisibilityIconConverter : IValueConverter
     {
-        public const string EyeOpen = "eye_open.svg";
-        public const string EyeClosed = "eye_closed.svg";
+        public const string eyeOpen = "eye_open.svg";
+        public const string eyeClosed = "eye_closed.svg";
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is bool isVisible && isVisible)
-                return EyeOpen;
+            // bool → string filename
 
-            return EyeClosed;
+            // If value is a bool & false
+            if (value is bool isVisible && isVisible)
+                return eyeOpen;
+
+            return eyeClosed;
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (!(value is bool isVisible && isVisible))
-                return EyeClosed;
+            // string filename → bool
 
-            return EyeOpen;
+            // If value is a string & "eye_open.svg"
+            if (value is string s && s == eyeOpen)
+                return true;
+
+            return false;
         }
     }
 }

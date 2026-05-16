@@ -2,13 +2,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Gotcha2.Maui.ViewModels.BaseViewModels
 {
-    // Shared base for every page-bound ViewModel. Owns the universal IsBusy + ErrorMessage state.
-    // Bind IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}" on form controls to disable
-    // them during async work, and surface ErrorMessage in a styled label.
+    /* Shared base for every page-bound ViewModel. Owns the universal IsBusy + Errors state.
+     * Bind IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}" on form controls
+     * to disable them during async work. For errors: bind a Label's Text to ErrorText and IsVisible to HasErrors,
+     * or a CollectionView's ItemsSource to Errors for one-line-per-error rendering.
+     * Errors mirrors the wire shape — IList<string> matches ResultModel.Errors so VMs can assign directly. */
     public abstract class PageBaseViewModel : ObservableObject
     {
         private bool isBusy;
-        private string errorMessage = string.Empty;
+        private IList<string> errors = new List<string>();
 
         public bool IsBusy
         {
@@ -16,10 +18,25 @@ namespace Gotcha2.Maui.ViewModels.BaseViewModels
             set { SetProperty(ref isBusy, value); }
         }
 
-        public string ErrorMessage
+        public IList<string> Errors
         {
-            get { return errorMessage; }
-            set { SetProperty(ref errorMessage, value); }
+            get { return errors; }
+            set
+            {
+                SetProperty(ref errors, value);
+                OnPropertyChanged(nameof(HasErrors));
+                OnPropertyChanged(nameof(ErrorText));
+            }
+        }
+
+        public bool HasErrors
+        {
+            get { return errors.Count > 0; }
+        }
+
+        public string ErrorText
+        {
+            get { return string.Join("\n", errors); }
         }
     }
 }
