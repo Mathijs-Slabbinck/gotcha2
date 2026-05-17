@@ -1,9 +1,152 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             x:DataType="viewmodels:HomeViewModel"
              x:Class="Gotcha2.Maui.Pages.Authenticated.Home"
-             Title="Home">
-    <Label Text="Home — stub. Phase 6 fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="Home"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" VerticalOptions="Center" Padding="0,30,0,0">
+
+            <!-- WELCOME heading -->
+            <Label Text="WELCOME"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   FontFamily="Bungee"
+                   Margin="0,0,0,25" />
+
+            <!-- Profile card -->
+            <Border BackgroundColor="{StaticResource CardBackground}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Margin="20,0"
+                    Padding="0">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource PrimaryBrush}"
+                            Offset="0,0"
+                            Radius="20"
+                            Opacity="0.4" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Card header -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12,12,0,0"
+                            Padding="0,14">
+                        <Label Text="YOUR PROFILE"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource Gray200}"
+                             HorizontalOptions="Fill" />
+
+                    <!-- Profile content -->
+                    <VerticalStackLayout Padding="30,20" Spacing="10">
+
+                        <!-- Avatar -->
+                        <Border StrokeShape="RoundRectangle 50"
+                                StrokeThickness="0"
+                                BackgroundColor="{StaticResource Gray200}"
+                                WidthRequest="100"
+                                HeightRequest="100"
+                                HorizontalOptions="Center"
+                                Margin="0,0,0,10">
+                            <Image Source="{Binding ProfileImage}"
+                                   Aspect="AspectFill"
+                                   AutomationId="ProfileImage" />
+                        </Border>
+
+                        <!-- Display name -->
+                        <Label Text="{Binding DisplayName}"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,10"
+                               AutomationId="DisplayNameLabel" />
+
+                        <!-- Stats -->
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" Padding="10,0" RowSpacing="8">
+
+                            <Label Grid.Row="0" Grid.Column="0"
+                                   Text="Games Played:"
+                                   TextColor="{StaticResource Gray600}"
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding GamesPlayed}"
+                                   TextColor="{StaticResource Gray900}"
+                                   FontAttributes="Bold"
+                                   AutomationId="GamesPlayedLabel" />
+
+                            <Label Grid.Row="1" Grid.Column="0"
+                                   Text="Games Won:"
+                                   TextColor="{StaticResource Gray600}"
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding GamesWon}"
+                                   TextColor="{StaticResource Gray900}"
+                                   FontAttributes="Bold"
+                                   AutomationId="GamesWonLabel" />
+
+                            <Label Grid.Row="2" Grid.Column="0"
+                                   Text="Total Kills:"
+                                   TextColor="{StaticResource Gray600}"
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding TotalKills}"
+                                   TextColor="{StaticResource Gray900}"
+                                   FontAttributes="Bold"
+                                   AutomationId="TotalKillsLabel" />
+
+                            <Label Grid.Row="3" Grid.Column="0"
+                                   Text="Member Since:"
+                                   TextColor="{StaticResource Gray600}"
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="3" Grid.Column="1"
+                                   Text="{Binding AccountCreatedText}"
+                                   TextColor="{StaticResource Gray900}"
+                                   FontAttributes="Bold"
+                                   AutomationId="AccountCreatedLabel" />
+
+                        </Grid>
+
+                        <!-- Loading indicator -->
+                        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                           IsVisible="{Binding IsBusy}"
+                                           Color="{StaticResource Primary}"
+                                           HorizontalOptions="Center"
+                                           Margin="0,10,0,0" />
+
+                        <!-- Error surface -->
+                        <Label Text="{Binding ErrorText}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               IsVisible="{Binding HasErrors}"
+                               Margin="0,10,0,0"
+                               AutomationId="ErrorMessageLabel" />
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Bottom spacer -->
+            <BoxView HeightRequest="30" BackgroundColor="Transparent" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>
