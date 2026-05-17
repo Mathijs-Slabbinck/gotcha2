@@ -65,6 +65,9 @@ namespace Gotcha2.Maui
             builder.Services.AddHttpClient("GotchaApi", client =>
             {
                 client.BaseAddress = new Uri(ApiHostConstants.BaseUrl);
+                // Fail fast on hangs (default is 100s). Keeps the UI from locking up if the API/tunnel is unreachable —
+                // TaskCanceledException bubbles up to each Api*Service's catch and the user sees an error within 15s.
+                client.Timeout = TimeSpan.FromSeconds(15);
             })
             .AddHttpMessageHandler<AuthHeaderHandler>()
             .AddHttpMessageHandler<UnauthorizedHandler>();

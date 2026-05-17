@@ -9,6 +9,7 @@ using Gotcha2.Maui.Models.Result;
 using Gotcha2.Maui.Services;
 using Gotcha2.Maui.ViewModels.BaseViewModels;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace Gotcha2.Maui.ViewModels
@@ -427,8 +428,9 @@ namespace Gotcha2.Maui.ViewModels
 
                 await ProcessPickedPhotoAsync(photo);
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[SignUpViewModel.TakePhoto] {ex}");
                 PhotoError = "Could not capture photo. Please try again.";
             }
         }

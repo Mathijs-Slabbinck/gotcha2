@@ -196,6 +196,7 @@ namespace Gotcha2.API.Controllers
         #region === PUT /api/users/me/profile-image ===
 
         [HttpPut("me/profile-image")]
+        [Consumes("multipart/form-data")]
         [RequestSizeLimit(MaxImageBytes)]
         // Under [ApiController], parameters get an inferred binding source:
         // - Complex types → [FromBody] (JSON)
