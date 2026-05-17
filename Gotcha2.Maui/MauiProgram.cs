@@ -86,7 +86,7 @@ namespace Gotcha2.Maui
             // builder.Services.AddTransient<HomeViewModel>();
             // builder.Services.AddTransient<GamesViewModel>();
             // builder.Services.AddTransient<NewGameViewModel>();
-            // builder.Services.AddTransient<SettingsViewModel>();
+            builder.Services.AddTransient<SettingsViewModel>();
             // builder.Services.AddTransient<PlayerHomeViewModel>();
             // builder.Services.AddTransient<ConfirmKillViewModel>();
             // builder.Services.AddTransient<MatchResultViewModel>();
