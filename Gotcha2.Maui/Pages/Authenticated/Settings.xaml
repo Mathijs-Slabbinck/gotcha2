@@ -24,7 +24,9 @@
                     StrokeShape="RoundRectangle 12"
                     StrokeThickness="0"
                     Margin="20,0"
-                    Padding="0">
+                    Padding="0"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="500">
                 <Border.Shadow>
                     <Shadow Brush="{StaticResource PrimaryBrush}"
                             Offset="0,0"
@@ -131,7 +133,9 @@
                     StrokeShape="RoundRectangle 12"
                     StrokeThickness="0"
                     Margin="20,25,20,0"
-                    Padding="0">
+                    Padding="0"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="500">
                 <Border.Shadow>
                     <Shadow Brush="{StaticResource PrimaryBrush}"
                             Offset="0,0"
@@ -338,7 +342,9 @@
                     StrokeShape="RoundRectangle 12"
                     StrokeThickness="0"
                     Margin="20,25,20,0"
-                    Padding="0">
+                    Padding="0"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="500">
                 <Border.Shadow>
                     <Shadow Brush="{StaticResource PrimaryBrush}"
                             Offset="0,0"
