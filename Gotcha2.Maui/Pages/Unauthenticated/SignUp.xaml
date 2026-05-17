@@ -295,7 +295,7 @@
                                IsVisible="{Binding ConfirmPasswordError, Converter={StaticResource StringNotEmptyConverter}}"
                                AutomationId="ConfirmPasswordErrorLabel" />
 
-                        <!-- Profile image (inert — Phase 8 wires MediaPicker + upload) -->
+                        <!-- Profile image (optional) -->
                         <Label Text="Profile image (optional):"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
@@ -312,6 +312,40 @@
                                     WidthRequest="220"
                                     AutomationId="ChoosePhotoButton" />
                         </VerticalStackLayout>
+
+                        <!-- Pre-flight error (size > 5 MB, wrong format) — Submit stays disabled while visible. -->
+                        <Label Text="{Binding PhotoError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,8,0,0"
+                               IsVisible="{Binding PhotoError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="PhotoErrorLabel" />
+
+                        <!-- Preview + Remove (visible only after a valid pick) -->
+                        <Grid IsVisible="{Binding HasPickedPhoto}"
+                              ColumnDefinitions="Auto,Auto"
+                              ColumnSpacing="12"
+                              HorizontalOptions="Center"
+                              Margin="0,10,0,0">
+                            <Border Grid.Column="0"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 40"
+                                    WidthRequest="80"
+                                    HeightRequest="80"
+                                    BackgroundColor="{StaticResource Gray100}">
+                                <Image Source="{Binding PickedPhotoSource}"
+                                       Aspect="AspectFill"
+                                       WidthRequest="80"
+                                       HeightRequest="80"
+                                       AutomationId="PickedPhotoPreview" />
+                            </Border>
+                            <Button Grid.Column="1"
+                                    Text="Remove"
+                                    Command="{Binding RemovePhotoCommand}"
+                                    VerticalOptions="Center"
+                                    AutomationId="RemovePhotoButton" />
+                        </Grid>
 
                         <!-- Remember me -->
                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0,15,0,0">
@@ -330,14 +364,37 @@
                                Margin="0,10,0,0"
                                AutomationId="ErrorMessageLabel" />
 
-                        <!-- Sign Up -->
+                        <!-- Sign Up (hidden while upload-retry phase is active) -->
                         <Button Text="Sign Up"
                                 Command="{Binding SignUpCommand}"
-                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                IsEnabled="{Binding CanSubmit}"
+                                IsVisible="{Binding IsAwaitingUploadRetry, Converter={StaticResource InvertBoolConverter}}"
                                 HorizontalOptions="Center"
                                 WidthRequest="220"
                                 Margin="0,15,0,0"
                                 AutomationId="SignUpButton" />
+
+                        <!-- Retry / Skip (visible only when register succeeded but upload failed) -->
+                        <VerticalStackLayout IsVisible="{Binding IsAwaitingUploadRetry}"
+                                             HorizontalOptions="Center"
+                                             Spacing="8"
+                                             Margin="0,15,0,0">
+                            <Button Text="Retry upload"
+                                    Command="{Binding RetryUploadCommand}"
+                                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                    WidthRequest="220"
+                                    AutomationId="RetryUploadButton" />
+                            <Label Text="Skip and continue"
+                                   TextColor="{StaticResource Tertiary}"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   Margin="0,4,0,0"
+                                   AutomationId="SkipPhotoLabel">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SkipPhotoAndContinueCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
 
                     </VerticalStackLayout>
                 </VerticalStackLayout>
