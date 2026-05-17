@@ -2,8 +2,121 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Gotcha2.Maui.Pages.Unauthenticated.Info"
-             Title="Info">
-    <Label Text="Info — stub. Phase 6 fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="Info"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" VerticalOptions="Center" Padding="0,30,0,30">
+
+            <!-- Title -->
+            <Label Text="WELCOME TO GOTCHA!"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   FontFamily="Bungee"
+                   Margin="0,0,0,25" />
+
+            <!-- Info card -->
+            <Border BackgroundColor="{StaticResource CardBackground}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Margin="20,0"
+                    Padding="0">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource PrimaryBrush}"
+                            Offset="0,0"
+                            Radius="20"
+                            Opacity="0.4" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Card header -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12,12,0,0"
+                            Padding="0,14">
+                        <Label Text="INFO"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource Gray200}"
+                             HorizontalOptions="Fill" />
+
+                    <!-- Content -->
+                    <VerticalStackLayout Padding="30,20" Spacing="5">
+
+                        <!-- What is Gotcha? -->
+                        <Label Text="What is Gotcha?"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,10" />
+
+                        <Label Text="Gotcha (also known as Assassin) is a social elimination game for friends, classmates, or coworkers."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                        <Label Text="Every player is secretly assigned another player as their target. Your job is to &quot;eliminate&quot; them before they eliminate theirs."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                        <!-- Separator -->
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="{StaticResource Gray200}"
+                                 HorizontalOptions="Fill"
+                                 Margin="0,15" />
+
+                        <!-- How it works -->
+                        <Label Text="How it works"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,10" />
+
+                        <Label Text="You get a secret target from the player list."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                        <Label Text="Catch them in whatever way the group agreed on, a tag, a photo, a silly task..."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                        <Label Text="Once they're out, you inherit their target and keep hunting."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                        <Label Text="The last player standing wins."
+                               TextColor="{StaticResource Gray600}"
+                               FontFamily="Roboto"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

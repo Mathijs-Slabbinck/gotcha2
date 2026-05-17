@@ -59,6 +59,7 @@
                         <Label Text="First name:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,0,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -89,6 +90,7 @@
                         <Label Text="Last name:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -119,6 +121,7 @@
                         <Label Text="Email:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -150,6 +153,7 @@
                         <Label Text="Gender:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -179,6 +183,7 @@
                         <Label Text="Birthday:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -206,6 +211,7 @@
                         <Label Text="Password:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -249,6 +255,7 @@
                         <Label Text="Confirm password:"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,15,0,5" />
                         <Border Stroke="{StaticResource Secondary}"
@@ -292,18 +299,19 @@
                         <Label Text="Profile image (optional):"
                                TextColor="{StaticResource Tertiary}"
                                FontAttributes="Bold"
+                               HorizontalOptions="Fill"
                                HorizontalTextAlignment="Center"
                                Margin="0,20,0,5" />
-                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <VerticalStackLayout HorizontalOptions="Center" Spacing="8">
                             <Button Text="Take photo"
                                     Command="{Binding TakePhotoCommand}"
-                                    WidthRequest="140"
+                                    WidthRequest="220"
                                     AutomationId="TakePhotoButton" />
                             <Button Text="Choose from gallery"
                                     Command="{Binding ChoosePhotoCommand}"
-                                    WidthRequest="180"
+                                    WidthRequest="220"
                                     AutomationId="ChoosePhotoButton" />
-                        </HorizontalStackLayout>
+                        </VerticalStackLayout>
 
                         <!-- Remember me -->
                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0,15,0,0">
