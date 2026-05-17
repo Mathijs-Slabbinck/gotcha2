@@ -152,6 +152,42 @@ namespace Gotcha2.Maui.Services.Api
             }
         }
 
+        public async Task<BaseResultModel> ChangeMyPasswordAsync(ChangeMyPasswordRequestDto request)
+        {
+            BaseResultModel result = new BaseResultModel();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.PutAsJsonAsync("api/users/me/change-password", request);
+
+                if (response.IsSuccessStatusCode)
+                    return result;
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ApiUserService.ChangeMyPasswordAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
         public async Task<BaseResultModel> UpdateProfileImageAsync(byte[] bytes, string contentType, string fileName)
         {
             BaseResultModel result = new BaseResultModel();

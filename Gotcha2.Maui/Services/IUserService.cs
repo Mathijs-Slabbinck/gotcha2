@@ -9,6 +9,7 @@ namespace Gotcha2.Maui.Services
         Task<ResultModel<UserItem>> GetMeAsync();
         Task<ResultModel<UserItem>> UpdateMeAsync(UserUpdateRequestDto request);
         Task<BaseResultModel> ChangePasswordAsync(ChangePasswordRequestDto request);
+        Task<BaseResultModel> ChangeMyPasswordAsync(ChangeMyPasswordRequestDto request);
         Task<BaseResultModel> UpdateProfileImageAsync(byte[] bytes, string contentType, string fileName);
         Task<ResultModel<byte[]>> GetProfileImageAsync(Guid userId);
     }
