@@ -97,6 +97,8 @@ namespace Gotcha2.Maui
             // === Validators (Phase 9) ===
             // Transient — stateless rule definitions; one instance per VM injection.
             builder.Services.AddTransient<IValidator<SignUpData>, SignUpValidator>();
+            builder.Services.AddTransient<IValidator<SettingsData>, SettingsValidator>();
+            builder.Services.AddTransient<IValidator<ChangeMyPasswordData>, ChangeMyPasswordValidator>();
 
             // === Pages ===
             // Transient — DI resolves and injects the VM (once VMs are wired in Phase 6).
