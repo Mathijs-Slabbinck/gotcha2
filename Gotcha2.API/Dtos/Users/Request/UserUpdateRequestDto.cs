@@ -5,8 +5,8 @@ using Gotcha2.Core.Enums;
 namespace Gotcha2.API.Dtos.Users.Request
 {
     // Used in: UsersController.
-    // For: PUT /api/users/me. Every profile field shown on the Settings page is editable here —
-    // Email (login key), FirstName/LastName, BirthDate, Gender. Account creation date + stats are not.
+    // For: PUT /api/users/me. Editable profile fields: Email (login key), FirstName/LastName, Gender.
+    // BirthDate is locked after signup (not on this DTO — server preserves the original value on update).
     public class UserUpdateRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
@@ -22,10 +22,6 @@ namespace Gotcha2.API.Dtos.Users.Request
         [IsNotReservedString]
         [NotImpersonatingRole]
         public string LastName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Birth date is required.")]
-        [ValidBirthday(MinAge = 13, MaxAge = 180)]
-        public DateTime? BirthDate { get; set; }
 
         [Required(ErrorMessage = "Gender is required.")]
         [EnumDataType(typeof(Genders), ErrorMessage = "Gender must be one of: Male, Female, Other.")]
