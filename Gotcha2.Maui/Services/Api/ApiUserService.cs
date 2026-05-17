@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Gotcha2.Maui.Models.Dtos.Request;
 using Gotcha2.Maui.Models.Dtos.Response;
@@ -145,6 +146,57 @@ namespace Gotcha2.Maui.Services.Api
                 // Normally I would use a logging framework,
                 // but a simple Debug.WriteLine is sufficient for this example and easier to explain
                 System.Diagnostics.Debug.WriteLine($"ApiUserService.ChangePasswordAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
+        public async Task<BaseResultModel> UpdateProfileImageAsync(byte[] bytes, string contentType, string fileName)
+        {
+            BaseResultModel result = new BaseResultModel();
+
+            try
+            {
+                // The API endpoint is [FromForm] IFormFile file - the multipart form field name must be exactly "file".
+
+                // Create an empty container that will become the request body.
+                MultipartFormDataContent content = new MultipartFormDataContent();
+                // Wrap the photo's raw bytes into something HttpContent-compatible.
+                ByteArrayContent fileContent = new ByteArrayContent(bytes);
+                // Stamp the part's Content-Type header with whatever the picked photo's MIME type was (image/jpeg, image/png, etc.)
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+                // Add the file content to the multipart form data container,
+                // specifying the field name ("file") and the original file name
+                // (we don't need this value, but we do need the param for the MultipartFormDataContent overload)
+                content.Add(fileContent, "file", fileName);
+
+                HttpResponseMessage response = await _httpClient.PutAsync("api/users/me/profile-image", content);
+
+                if (response.IsSuccessStatusCode)
+                    return result;
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiUserService.UpdateProfileImageAsync failed: {ex.Message}");
 
                 result.Errors.Add("Could not reach the server. Please check your connection.");
                 return result;
