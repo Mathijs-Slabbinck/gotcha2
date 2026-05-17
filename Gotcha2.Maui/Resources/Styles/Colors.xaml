@@ -20,7 +20,7 @@
     <Color x:Key="CyanTransparent">#405AD6DE</Color>  <!-- used by: (none yet) -->
 
     <Color x:Key="Danger">#D32F2F</Color>             <!-- used by: SignIn (error label) -->
-    <Color x:Key="Success">#2E7D32</Color>            <!-- used by: (none yet — reserved for SignUp + success toasts) -->
+    <Color x:Key="Success">#2E7D32</Color>            <!-- used by: Settings (Saved. / Password updated. badges) -->
 
     <Color x:Key="Gray100">#E1E1E1</Color>            <!-- used by: (none yet) -->
     <Color x:Key="Gray200">#C8C8C8</Color>            <!-- used by: SignIn (card separator BoxView) -->
