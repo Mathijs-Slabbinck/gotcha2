@@ -83,7 +83,7 @@ namespace Gotcha2.Maui
             // Transient — fresh state per navigation. Uncomment as VMs land:
             builder.Services.AddTransient<SignInViewModel>();
             builder.Services.AddTransient<SignUpViewModel>();
-            // builder.Services.AddTransient<HomeViewModel>();
+            builder.Services.AddTransient<HomeViewModel>();
             // builder.Services.AddTransient<GamesViewModel>();
             // builder.Services.AddTransient<NewGameViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
