@@ -8,6 +8,7 @@ using Gotcha2.Maui.Models.Forms;
 using Gotcha2.Maui.Models.Result;
 using Gotcha2.Maui.Services;
 using Gotcha2.Maui.ViewModels.BaseViewModels;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Gotcha2.Maui.ViewModels
@@ -17,6 +18,13 @@ namespace Gotcha2.Maui.ViewModels
         private readonly IAuthService _authService;
         private readonly SessionService _sessionService;
         private readonly IValidator<SignUpData> _validator;
+        private readonly IUserService _userService;
+
+        // Photo upload constants — mirror the API's PUT /api/users/me/profile-image gate.
+        private const long MaxPhotoBytes = 5 * 1024 * 1024;
+        private const string JpegMimeType = "image/jpeg";
+        private const string PngMimeType = "image/png";
+        private const string DefaultPhotoFileName = "photo.jpg";
 
 
         private string firstName = string.Empty;
@@ -168,18 +176,77 @@ namespace Gotcha2.Maui.ViewModels
             set { SetProperty(ref isConfirmPasswordVisible, value); }
         }
 
+        // Picked photo state — bytes + source for preview, contentType + fileName for upload.
+        // ContentType + FileName stay as plain fields because no XAML binds to them.
+        private string? pickedPhotoContentType;
+        private string? pickedPhotoFileName;
+
+        private byte[]? pickedPhotoBytes;
+        public byte[]? PickedPhotoBytes
+        {
+            get { return pickedPhotoBytes; }
+            set
+            {
+                SetProperty(ref pickedPhotoBytes, value);
+                OnPropertyChanged(nameof(HasPickedPhoto));
+            }
+        }
+
+        private ImageSource? pickedPhotoSource;
+        public ImageSource? PickedPhotoSource
+        {
+            get { return pickedPhotoSource; }
+            set { SetProperty(ref pickedPhotoSource, value); }
+        }
+
+        public bool HasPickedPhoto
+        {
+            get { return pickedPhotoBytes != null; }
+        }
+
+        private string photoError = string.Empty;
+        public string PhotoError
+        {
+            get { return photoError; }
+            set
+            {
+                SetProperty(ref photoError, value);
+                OnPropertyChanged(nameof(CanSubmit));
+            }
+        }
+
+        // Toggled to true only when register + BeginSession both succeeded but the photo upload failed.
+        // Hides the Submit row and reveals the Retry / Skip row.
+        private bool isAwaitingUploadRetry;
+        public bool IsAwaitingUploadRetry
+        {
+            get { return isAwaitingUploadRetry; }
+            set { SetProperty(ref isAwaitingUploadRetry, value); }
+        }
+
+        // Combined gate for the Submit button — disabled while busy OR while a pre-flight photo error is showing.
+        // CanSubmit refreshes via the OnPropertyChanged override (on IsBusy) and via PhotoError's setter.
+        public bool CanSubmit
+        {
+            get { return !IsBusy && string.IsNullOrEmpty(photoError); }
+        }
+
         public ICommand SignUpCommand { get; }
         public ICommand TogglePasswordVisibilityCommand { get; }
         public ICommand ToggleConfirmPasswordVisibilityCommand { get; }
         public ICommand TakePhotoCommand { get; }
         public ICommand ChoosePhotoCommand { get; }
+        public ICommand RemovePhotoCommand { get; }
+        public ICommand RetryUploadCommand { get; }
+        public ICommand SkipPhotoAndContinueCommand { get; }
         public ICommand SignInCommand { get; }
 
-        public SignUpViewModel(IAuthService authService, SessionService sessionService, IValidator<SignUpData> validator)
+        public SignUpViewModel(IAuthService authService, SessionService sessionService, IValidator<SignUpData> validator, IUserService userService)
         {
             _authService = authService;
             _sessionService = sessionService;
             _validator = validator;
+            _userService = userService;
 
             GenderOptions = new List<Genders> { Genders.Male, Genders.Female, Genders.Other };
 
@@ -188,7 +255,20 @@ namespace Gotcha2.Maui.ViewModels
             ToggleConfirmPasswordVisibilityCommand = new Command(ExecuteToggleConfirmPasswordVisibility);
             TakePhotoCommand = new Command(ExecuteTakePhotoCommand);
             ChoosePhotoCommand = new Command(ExecuteChoosePhotoCommand);
+            RemovePhotoCommand = new Command(ExecuteRemovePhotoCommand);
+            RetryUploadCommand = new Command(ExecuteRetryUploadCommand);
+            SkipPhotoAndContinueCommand = new Command(ExecuteSkipPhotoAndContinueCommand);
             SignInCommand = new Command(ExecuteSignInCommand);
+        }
+
+        // CanSubmit depends on IsBusy (base) and PhotoError (local).
+        // PhotoError's setter raises CanSubmit directly; IsBusy is raised from the base, so we re-fire here.
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            if (e.PropertyName == nameof(IsBusy))
+                OnPropertyChanged(nameof(CanSubmit));
         }
 
         private async void ExecuteSignUpCommand()
@@ -241,15 +321,31 @@ namespace Gotcha2.Maui.ViewModels
                     if (RememberMe)
                         await _sessionService.PersistAsync(result.Data.UserId, result.Data.Token);
 
+                    // Bearer token is now set on SessionService → AuthHeaderHandler will stamp it on the upload call.
+                    // Pre-flight passed back when the photo was picked; the only residual failure here is a network glitch
+                    // mid-flight. On failure we enter the retry phase (UI hides Submit, shows Retry + Skip).
+                    if (HasPickedPhoto)
+                    {
+                        bool uploadedOk = await UploadPhotoAsync();
+
+                        if (!uploadedOk)
+                        {
+                            IsAwaitingUploadRetry = true;
+                            IsBusy = false;
+                            return;
+                        }
+                    }
+
                     await _sessionService.SwitchToAuthenticatedTabBarAsync();
                 }
+
+                IsBusy = false;
             }
             catch
             {
                 Errors = new List<string> { "Something went wrong. Please try again." };
+                IsBusy = false;
             }
-
-            IsBusy = false;
         }
 
         private void DispatchValidationFailures(ValidationResult validationResult)
@@ -303,14 +399,189 @@ namespace Gotcha2.Maui.ViewModels
             IsConfirmPasswordVisible = !IsConfirmPasswordVisible;
         }
 
-        private void ExecuteTakePhotoCommand()
+        private async void ExecuteTakePhotoCommand()
         {
-            // Phase 8 — wires MediaPicker.Default.CapturePhotoAsync + upload to PUT /api/users/me/profile-image.
+            try
+            {
+                PhotoError = string.Empty;
+
+                if (!MediaPicker.Default.IsCaptureSupported)
+                {
+                    PhotoError = "Camera is not supported on this device.";
+                    return;
+                }
+
+                PermissionStatus status = await Permissions.RequestAsync<Permissions.Camera>();
+
+                if (status != PermissionStatus.Granted)
+                {
+                    PhotoError = "Camera permission denied.";
+                    return;
+                }
+
+                FileResult? photo = await MediaPicker.Default.CapturePhotoAsync();
+
+                // Null = user cancelled the picker. Bail silently (no error).
+                if (photo == null)
+                    return;
+
+                await ProcessPickedPhotoAsync(photo);
+            }
+            catch
+            {
+                PhotoError = "Could not capture photo. Please try again.";
+            }
         }
 
-        private void ExecuteChoosePhotoCommand()
+        private async void ExecuteChoosePhotoCommand()
         {
-            // Phase 8 — wires MediaPicker.Default.PickPhotoAsync + upload to PUT /api/users/me/profile-image.
+            try
+            {
+                PhotoError = string.Empty;
+
+                // PickPhotoAsync is deprecated in current MAUI — PickPhotosAsync is the supported single + multi entrypoint.
+                // We only care about the first one (UX is single-photo).
+                IEnumerable<FileResult> photos = await MediaPicker.Default.PickPhotosAsync();
+                FileResult? photo = photos.FirstOrDefault();
+
+                // Null = user cancelled the picker. Bail silently (no error).
+                if (photo == null)
+                    return;
+
+                await ProcessPickedPhotoAsync(photo);
+            }
+            catch
+            {
+                PhotoError = "Could not load photo. Please try again.";
+            }
+        }
+
+        private void ExecuteRemovePhotoCommand()
+        {
+            ClearPickedPhoto();
+        }
+
+        private async void ExecuteRetryUploadCommand()
+        {
+            try
+            {
+                IsBusy = true;
+
+                bool uploadedOk = await UploadPhotoAsync();
+
+                if (uploadedOk)
+                {
+                    IsAwaitingUploadRetry = false;
+                    await _sessionService.SwitchToAuthenticatedTabBarAsync();
+                }
+                // else: Errors was refreshed by UploadPhotoAsync; stay in retry phase for another try or Skip.
+
+                IsBusy = false;
+            }
+            catch
+            {
+                Errors = new List<string> { "Something went wrong. Please try again." };
+                IsBusy = false;
+            }
+        }
+
+        private async void ExecuteSkipPhotoAndContinueCommand()
+        {
+            try
+            {
+                ClearPickedPhoto();
+                IsAwaitingUploadRetry = false;
+                Errors = new List<string>();
+                await _sessionService.SwitchToAuthenticatedTabBarAsync();
+            }
+            catch
+            {
+                Errors = new List<string> { "Something went wrong. Please try again." };
+            }
+        }
+
+        private async Task ProcessPickedPhotoAsync(FileResult photo)
+        {
+            // Read the FileResult stream once into memory. 5 MB cap means in-memory is fine, and it lets the
+            // preview ImageSource and the upload share the same byte[] instead of re-opening the stream
+            // (which on Android can be a content:// URI that's not always re-openable).
+            using Stream stream = await photo.OpenReadAsync();
+            using MemoryStream memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            byte[] bytes = memoryStream.ToArray();
+
+            string contentType;
+
+            if (!string.IsNullOrEmpty(photo.ContentType))
+                contentType = photo.ContentType;
+            else
+                contentType = JpegMimeType;
+
+            string fileName;
+
+            if (!string.IsNullOrEmpty(photo.FileName))
+                fileName = photo.FileName;
+            else
+                fileName = DefaultPhotoFileName;
+
+            BaseResultModel preflight = RunPhotoPreflight(bytes, contentType);
+
+            if (!preflight.IsSuccess)
+            {
+                // Leave any previously-picked valid photo in place — user can Remove it or pick another.
+                PhotoError = preflight.Errors.FirstOrDefault() ?? "Invalid photo.";
+                return;
+            }
+
+            pickedPhotoContentType = contentType;
+            pickedPhotoFileName = fileName;
+            PickedPhotoSource = ImageSource.FromStream(() => new MemoryStream(bytes));
+            PickedPhotoBytes = bytes;
+        }
+
+        private static BaseResultModel RunPhotoPreflight(byte[] bytes, string contentType)
+        {
+            BaseResultModel result = new BaseResultModel();
+
+            if (bytes.Length > MaxPhotoBytes)
+            {
+                result.Errors.Add("Photo too large (max 5 MB).");
+                return result;
+            }
+
+            bool isJpeg = string.Equals(contentType, JpegMimeType, StringComparison.OrdinalIgnoreCase);
+            bool isPng = string.Equals(contentType, PngMimeType, StringComparison.OrdinalIgnoreCase);
+
+            if (!isJpeg && !isPng)
+                result.Errors.Add("Only JPEG or PNG photos are accepted.");
+
+            return result;
+        }
+
+        private async Task<bool> UploadPhotoAsync()
+        {
+            // Caller has already checked HasPickedPhoto, so the three photo fields are non-null here.
+            BaseResultModel result = await _userService.UpdateProfileImageAsync(
+                pickedPhotoBytes!,
+                pickedPhotoContentType!,
+                pickedPhotoFileName!);
+
+            if (!result.IsSuccess)
+            {
+                Errors = result.Errors;
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ClearPickedPhoto()
+        {
+            PickedPhotoBytes = null;
+            PickedPhotoSource = null;
+            pickedPhotoContentType = null;
+            pickedPhotoFileName = null;
+            PhotoError = string.Empty;
         }
 
         private async void ExecuteSignInCommand()
@@ -334,6 +605,10 @@ namespace Gotcha2.Maui.ViewModels
             ConfirmPasswordError = string.Empty;
             BirthDateError = string.Empty;
             GenderError = string.Empty;
+
+            // Photo errors are cleared only on the pick path (or on Remove). ResetErrors fires on Submit;
+            // a lingering PhotoError there means the pre-flight Submit-gate is still active and we want it to stay so.
+            // IsAwaitingUploadRetry is cleared on Skip / successful Retry — also not here.
 
             Errors = new List<string>();
         }
