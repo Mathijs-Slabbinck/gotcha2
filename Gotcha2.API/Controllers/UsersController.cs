@@ -157,6 +157,39 @@ namespace Gotcha2.API.Controllers
 
         #endregion
 
+        #region === PUT /api/users/me/change-password ===
+
+        [HttpPut("me/change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangeMyPasswordRequestDto dto)
+        {
+            Guid currentUserId = User.GetUserId();
+            GotchaUser? user = await _userManager.FindByIdAsync(currentUserId.ToString());
+
+            if (user == null)
+                return NotFound(new[] { "User not found." });
+
+            // Authenticated change-password flow: caller must prove they know the current password.
+            // Distinct from /me/password (the forgot-password surface) — see ChangeMyPasswordRequestDto comment.
+            bool currentPasswordOk = await _userManager.CheckPasswordAsync(user, dto.CurrentPassword);
+
+            if (!currentPasswordOk)
+                return BadRequest(new[] { "Current password is incorrect." });
+
+            IdentityResult removeResult = await _userManager.RemovePasswordAsync(user);
+
+            if (!removeResult.Succeeded)
+                return BadRequest(removeResult.Errors.Select(e => e.Description).ToArray());
+
+            IdentityResult addResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+
+            if (!addResult.Succeeded)
+                return BadRequest(addResult.Errors.Select(e => e.Description).ToArray());
+
+            return NoContent();
+        }
+
+        #endregion
+
         #region === GET /api/users/{id}/profile-image ===
 
         [HttpGet("{id:guid}/profile-image")]
