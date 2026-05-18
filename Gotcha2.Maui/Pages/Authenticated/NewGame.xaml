@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Gotcha2.Maui.Pages.Authenticated.NewGame"
+             Title="NewGame">
+    <Label Text="NewGame — stub. Next TODO bullet fills this in."
+           HorizontalOptions="Center"
+           VerticalOptions="Center" />
+</ContentPage>
