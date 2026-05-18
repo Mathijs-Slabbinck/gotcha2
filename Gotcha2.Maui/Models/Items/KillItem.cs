@@ -8,7 +8,9 @@ namespace Gotcha2.Maui.Models.Items
         public required Guid KillId { get; init; }
         public required Guid GameId { get; init; }
         public required string MomentText { get; init; }
+        public required Guid KillerUserId { get; init; }
         public required string KillerDisplayName { get; init; }
+        public required Guid VictimUserId { get; init; }
         public required string VictimDisplayName { get; init; }
     }
 }

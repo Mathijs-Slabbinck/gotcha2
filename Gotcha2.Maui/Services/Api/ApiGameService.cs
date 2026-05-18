@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Gotcha2.Maui.Models.Dtos.Request;
 using Gotcha2.Maui.Models.Dtos.Response;
@@ -69,6 +70,57 @@ namespace Gotcha2.Maui.Services.Api
                 // Normally I would use a logging framework,
                 // but a siple Debug.WriteLine is sufficient for this example and easier to explain
                 System.Diagnostics.Debug.WriteLine($"ApiGameService.GetAllAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
+        public async Task<ResultModel<GameDetailItem>> GetByIdAsync(Guid gameId)
+        {
+            ResultModel<GameDetailItem> result = new ResultModel<GameDetailItem>();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync($"api/games/{gameId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    GameResponseDto? data = await response.Content.ReadFromJsonAsync<GameResponseDto>();
+
+                    if (data is null)
+                    {
+                        result.Errors.Add("Empty response from server.");
+                        return result;
+                    }
+
+                    Guid currentUserId = _sessionService.CurrentUserId ?? Guid.Empty;
+
+                    result.Data = ToGameDetailItem(data, currentUserId);
+                    return result;
+                }
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiGameService.GetByIdAsync failed: {ex.Message}");
 
                 result.Errors.Add("Could not reach the server. Please check your connection.");
                 return result;
@@ -345,6 +397,63 @@ namespace Gotcha2.Maui.Services.Api
             }
         }
 
+        public async Task<ResultModel<TargetAssignmentItem?>> GetMyTargetAsync(Guid gameId)
+        {
+            ResultModel<TargetAssignmentItem?> result = new ResultModel<TargetAssignmentItem?>();
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync($"api/games/{gameId}/my-target");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TargetAssignmentResponseDto? data = await response.Content.ReadFromJsonAsync<TargetAssignmentResponseDto>();
+
+                    if (data is null)
+                    {
+                        result.Errors.Add("Empty response from server.");
+                        return result;
+                    }
+
+                    result.Data = ToTargetAssignmentItem(data);
+                    return result;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    // No open assignment (caller is dead, between assignments, or game not started yet).
+                    // Surface as success + null data so the UI can hide the target card without showing an error.
+                    result.Data = null;
+                    return result;
+                }
+
+                List<string>? errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                if (errors is not null && errors.Count > 0)
+                {
+                    foreach (string err in errors)
+                    {
+                        result.Errors.Add(err);
+                    }
+                }
+                else
+                {
+                    result.Errors.Add("Something went wrong. Please try again.");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Normally I would use a logging framework,
+                // but a simple Debug.WriteLine is sufficient for this example and easier to explain
+                System.Diagnostics.Debug.WriteLine($"ApiGameService.GetMyTargetAsync failed: {ex.Message}");
+
+                result.Errors.Add("Could not reach the server. Please check your connection.");
+                return result;
+            }
+        }
+
         private static KillItem ToKillItem(KillSummaryDto dto, Guid gameId)
         {
             return new KillItem
@@ -352,7 +461,9 @@ namespace Gotcha2.Maui.Services.Api
                 KillId = dto.Id,
                 GameId = gameId,
                 MomentText = dto.Moment.ToString("dd MMM yyyy HH:mm"),
+                KillerUserId = dto.Killer.UserId,
                 KillerDisplayName = $"{dto.Killer.FirstName} {dto.Killer.LastName}",
+                VictimUserId = dto.Victim.UserId,
                 VictimDisplayName = $"{dto.Victim.FirstName} {dto.Victim.LastName}"
             };
         }
@@ -364,7 +475,9 @@ namespace Gotcha2.Maui.Services.Api
                 KillId = dto.Id,
                 GameId = dto.GameId,
                 MomentText = dto.Moment.ToString("dd MMM yyyy HH:mm"),
+                KillerUserId = dto.Killer.UserId,
                 KillerDisplayName = $"{dto.Killer.FirstName} {dto.Killer.LastName}",
+                VictimUserId = dto.Victim.UserId,
                 VictimDisplayName = $"{dto.Victim.FirstName} {dto.Victim.LastName}"
             };
         }
@@ -404,6 +517,62 @@ namespace Gotcha2.Maui.Services.Api
                 IsCreator = dto.CreatorId == currentUserId,
                 CurrentUserPlayerId = dto.Players.FirstOrDefault(p => p.UserId == currentUserId)?.Id,
                 IsWinner = dto.WinnerId == currentUserId
+            };
+        }
+
+        private static GameDetailItem ToGameDetailItem(GameResponseDto dto, Guid currentUserId)
+        {
+            List<PlayerItem> players = new List<PlayerItem>();
+
+            foreach (PlayerSummaryDto player in dto.Players)
+            {
+                players.Add(ToPlayerItem(player));
+            }
+
+            return new GameDetailItem
+            {
+                GameId = dto.Id,
+                Name = dto.Name,
+                CreationDateText = dto.CreationDate.ToString("dd MMM yyyy"),
+                StartDateText = dto.StartDate?.ToString("dd MMM yyyy") ?? string.Empty,
+                EndDateText = dto.EndDate?.ToString("dd MMM yyyy") ?? string.Empty,
+                HasStarted = dto.HasStarted,
+                IsFinished = dto.IsFinished,
+                KillCount = dto.KillCount,
+                IsCreator = dto.CreatorId == currentUserId,
+                CreatorId = dto.CreatorId,
+                WinnerId = dto.WinnerId,
+                CurrentUserPlayerId = dto.Players.FirstOrDefault(p => p.UserId == currentUserId)?.Id,
+                IsWinner = dto.WinnerId == currentUserId,
+                Players = players
+            };
+        }
+
+        // Duplicated from ApiPlayerService.ToPlayerItem on purpose — per-service encapsulation
+        // beats spinning up a shared helper for two callers. Extract if a third consumer ever lands.
+        private static PlayerItem ToPlayerItem(PlayerSummaryDto dto)
+        {
+            return new PlayerItem
+            {
+                PlayerId = dto.Id,
+                UserId = dto.UserId,
+                DisplayName = $"{dto.FirstName} {dto.LastName}",
+                IsAlive = dto.IsAlive,
+                HasProfileImage = dto.HasProfileImage
+            };
+        }
+
+        private static TargetAssignmentItem ToTargetAssignmentItem(TargetAssignmentResponseDto dto)
+        {
+            return new TargetAssignmentItem
+            {
+                AssignmentId = dto.Id,
+                GameId = dto.GameId,
+                AssignedDateText = dto.TargetAssigned.ToString("dd MMM yyyy HH:mm"),
+                TargetPlayerId = dto.Target.Id,
+                TargetUserId = dto.Target.UserId,
+                TargetDisplayName = $"{dto.Target.FirstName} {dto.Target.LastName}",
+                TargetHasProfileImage = dto.Target.HasProfileImage
             };
         }
     }
