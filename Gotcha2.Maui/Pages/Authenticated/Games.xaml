@@ -1,9 +1,320 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             xmlns:items="clr-namespace:Gotcha2.Maui.Models.Items"
+             x:Name="gamesPage"
+             x:DataType="viewmodels:GamesViewModel"
              x:Class="Gotcha2.Maui.Pages.Authenticated.Games"
-             Title="Games">
-    <Label Text="Games — stub. Phase 6 fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="Games"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="{StaticResource Primary}">
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="0,30,0,30">
+
+                <!-- GAMES heading -->
+                <Label Text="GAMES"
+                       TextColor="{StaticResource Primary}"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       FontFamily="Bungee"
+                       Margin="0,0,0,5" />
+
+                <!-- New game button -->
+                <Button Text="New game"
+                        Command="{Binding NewGameCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        HorizontalOptions="Center"
+                        WidthRequest="220"
+                        AutomationId="NewGameButton" />
+
+                <!-- ===== PENDING card ===== -->
+                <Border BackgroundColor="{StaticResource CardBackground}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="0"
+                        Margin="20,0"
+                        Padding="0"
+                        HorizontalOptions="Center"
+                        MaximumWidthRequest="500">
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource PrimaryBrush}"
+                                Offset="0,0"
+                                Radius="20"
+                                Opacity="0.4" />
+                    </Border.Shadow>
+
+                    <VerticalStackLayout Spacing="0">
+
+                        <!-- Card header -->
+                        <Border BackgroundColor="{StaticResource CardBackground}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12,12,0,0"
+                                Padding="0,14">
+                            <Label Text="PENDING GAMES"
+                                   TextColor="{StaticResource Tertiary}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   FontFamily="RobotoSlab"
+                                   HorizontalTextAlignment="Center" />
+                        </Border>
+
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="{StaticResource Gray200}"
+                                 HorizontalOptions="Fill" />
+
+                        <!-- Content -->
+                        <VerticalStackLayout Padding="20,15" Spacing="10">
+
+                            <Label Text="No pending games."
+                                   TextColor="{StaticResource Gray600}"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding HasPending, Converter={StaticResource InvertBoolConverter}}"
+                                   AutomationId="PendingGamesEmptyLabel" />
+
+                            <CollectionView ItemsSource="{Binding PendingGames}"
+                                            SelectionMode="None"
+                                            IsVisible="{Binding HasPending}"
+                                            AutomationId="PendingGamesCollectionView">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="items:GameItem">
+                                        <Border BackgroundColor="{StaticResource Gray100}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0"
+                                                Padding="12,10">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenGameCommand, Source={x:Reference gamesPage}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="2">
+                                                <Label Grid.Row="0" Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontAttributes="Bold"
+                                                       FontSize="15" />
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding PlayerCount, StringFormat='{0} players'}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       Text="{Binding CreationDateText, StringFormat='Created {0}'}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== ACTIVE card ===== -->
+                <Border BackgroundColor="{StaticResource CardBackground}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="0"
+                        Margin="20,0"
+                        Padding="0"
+                        HorizontalOptions="Center"
+                        MaximumWidthRequest="500">
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource PrimaryBrush}"
+                                Offset="0,0"
+                                Radius="20"
+                                Opacity="0.4" />
+                    </Border.Shadow>
+
+                    <VerticalStackLayout Spacing="0">
+
+                        <Border BackgroundColor="{StaticResource CardBackground}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12,12,0,0"
+                                Padding="0,14">
+                            <Label Text="ACTIVE GAMES"
+                                   TextColor="{StaticResource Tertiary}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   FontFamily="RobotoSlab"
+                                   HorizontalTextAlignment="Center" />
+                        </Border>
+
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="{StaticResource Gray200}"
+                                 HorizontalOptions="Fill" />
+
+                        <VerticalStackLayout Padding="20,15" Spacing="10">
+
+                            <Label Text="No active games."
+                                   TextColor="{StaticResource Gray600}"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding HasActive, Converter={StaticResource InvertBoolConverter}}"
+                                   AutomationId="ActiveGamesEmptyLabel" />
+
+                            <CollectionView ItemsSource="{Binding ActiveGames}"
+                                            SelectionMode="None"
+                                            IsVisible="{Binding HasActive}"
+                                            AutomationId="ActiveGamesCollectionView">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="items:GameItem">
+                                        <Border BackgroundColor="{StaticResource Gray100}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0"
+                                                Padding="12,10">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenGameCommand, Source={x:Reference gamesPage}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="2">
+                                                <Label Grid.Row="0" Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontAttributes="Bold"
+                                                       FontSize="15" />
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding PlayerCount, StringFormat='{0} players'}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       Text="{Binding StartDateText, StringFormat='Started {0}'}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== PAST card ===== -->
+                <Border BackgroundColor="{StaticResource CardBackground}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="0"
+                        Margin="20,0"
+                        Padding="0"
+                        HorizontalOptions="Center"
+                        MaximumWidthRequest="500">
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource PrimaryBrush}"
+                                Offset="0,0"
+                                Radius="20"
+                                Opacity="0.4" />
+                    </Border.Shadow>
+
+                    <VerticalStackLayout Spacing="0">
+
+                        <Border BackgroundColor="{StaticResource CardBackground}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12,12,0,0"
+                                Padding="0,14">
+                            <Label Text="PAST GAMES"
+                                   TextColor="{StaticResource Tertiary}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   FontFamily="RobotoSlab"
+                                   HorizontalTextAlignment="Center" />
+                        </Border>
+
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="{StaticResource Gray200}"
+                                 HorizontalOptions="Fill" />
+
+                        <VerticalStackLayout Padding="20,15" Spacing="10">
+
+                            <Label Text="No past games."
+                                   TextColor="{StaticResource Gray600}"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding HasPast, Converter={StaticResource InvertBoolConverter}}"
+                                   AutomationId="PastGamesEmptyLabel" />
+
+                            <CollectionView ItemsSource="{Binding PastGames}"
+                                            SelectionMode="None"
+                                            IsVisible="{Binding HasPast}"
+                                            AutomationId="PastGamesCollectionView">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="items:GameItem">
+                                        <Border BackgroundColor="{StaticResource Gray100}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0"
+                                                Padding="12,10">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenGameCommand, Source={x:Reference gamesPage}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="2">
+                                                <Label Grid.Row="0" Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontAttributes="Bold"
+                                                       FontSize="15" />
+                                                <Label Grid.Row="0" Grid.Column="1"
+                                                       Text="{Binding PlayerCount, StringFormat='{0} players'}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12"
+                                                       VerticalOptions="Center" />
+                                                <VerticalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Spacing="2">
+                                                    <Label Text="{Binding EndDateText, StringFormat='Ended {0}'}"
+                                                           TextColor="{StaticResource Gray600}"
+                                                           FontSize="12" />
+                                                    <Label Text="You won!"
+                                                           TextColor="{StaticResource Success}"
+                                                           FontSize="12"
+                                                           FontAttributes="Bold"
+                                                           IsVisible="{Binding IsWinner}" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Loading indicator -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Primary}"
+                                   HorizontalOptions="Center" />
+
+                <!-- Error surface -->
+                <Label Text="{Binding ErrorText}"
+                       TextColor="{StaticResource Danger}"
+                       FontSize="12"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="{Binding HasErrors}"
+                       Margin="20,0"
+                       AutomationId="ErrorMessageLabel" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </RefreshView>
+
 </ContentPage>
