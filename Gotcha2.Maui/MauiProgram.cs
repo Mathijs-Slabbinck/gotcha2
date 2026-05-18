@@ -15,6 +15,8 @@ using Info = Gotcha2.Maui.Pages.Unauthenticated.Info;
 using Home = Gotcha2.Maui.Pages.Authenticated.Home;
 using Games = Gotcha2.Maui.Pages.Authenticated.Games;
 using Settings = Gotcha2.Maui.Pages.Authenticated.Settings;
+using NewGame = Gotcha2.Maui.Pages.Authenticated.NewGame;
+using PlayerHome = Gotcha2.Maui.Pages.Authenticated.PlayerHome;
 
 namespace Gotcha2.Maui
 {
@@ -26,11 +28,10 @@ namespace Gotcha2.Maui
             // TabBar-mounted pages (SignIn/SignUp/Info/Home/Games/Settings) skip Routing.RegisterRoute —
             // they're declared as <ShellContent> in AppShell.xaml and Shell resolves them by Route attribute.
             // Relative routes pushed onto the current tab's nav stack must be registered here.
-            // Phase 6 will create these pages — uncomment as they land:
-            // Routing.RegisterRoute(RoutesConstants.NewGame, typeof(NewGame));
-            // Routing.RegisterRoute(RoutesConstants.PlayerHome, typeof(PlayerHome));
+            // Phase 6 — uncomment as they land:
+            Routing.RegisterRoute(RoutesConstants.NewGame, typeof(NewGame));
+            Routing.RegisterRoute(RoutesConstants.PlayerHome, typeof(PlayerHome));
             // Routing.RegisterRoute(RoutesConstants.ConfirmKill, typeof(ConfirmKill));
-            // Routing.RegisterRoute(RoutesConstants.MatchResult, typeof(MatchResult));
 
             MauiAppBuilder builder = MauiApp.CreateBuilder();
             builder
@@ -87,12 +88,11 @@ namespace Gotcha2.Maui
             builder.Services.AddTransient<SignInViewModel>();
             builder.Services.AddTransient<SignUpViewModel>();
             builder.Services.AddTransient<HomeViewModel>();
-            // builder.Services.AddTransient<GamesViewModel>();
+            builder.Services.AddTransient<GamesViewModel>();
             // builder.Services.AddTransient<NewGameViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
             // builder.Services.AddTransient<PlayerHomeViewModel>();
             // builder.Services.AddTransient<ConfirmKillViewModel>();
-            // builder.Services.AddTransient<MatchResultViewModel>();
 
             // === Validators (Phase 9) ===
             // Transient — stateless rule definitions; one instance per VM injection.
@@ -110,10 +110,9 @@ namespace Gotcha2.Maui
             builder.Services.AddTransient<Games>();
             builder.Services.AddTransient<Settings>();
             // Phase 6 — relative-route pages:
-            // builder.Services.AddTransient<NewGame>();
-            // builder.Services.AddTransient<PlayerHome>();
+            builder.Services.AddTransient<NewGame>();
+            builder.Services.AddTransient<PlayerHome>();
             // builder.Services.AddTransient<ConfirmKill>();
-            // builder.Services.AddTransient<MatchResult>();
 
             return builder.Build();
         }
