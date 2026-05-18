@@ -24,21 +24,15 @@ namespace Gotcha2.API.Validation
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value is null)
-            {
                 return ValidationResult.Success;
-            }
 
             if (value is not string text)
-            {
                 return new ValidationResult("Value must be a string.");
-            }
 
             string trimmed = text.Trim();
 
             if (ReservedRoles.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
-            {
                 return new ValidationResult($"{validationContext.DisplayName} cannot be a reserved role name.");
-            }
 
             return ValidationResult.Success;
         }
