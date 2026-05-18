@@ -1,9 +1,564 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             xmlns:items="clr-namespace:Gotcha2.Maui.Models.Items"
+             x:Name="playerHomePage"
+             x:DataType="viewmodels:PlayerHomeViewModel"
              x:Class="Gotcha2.Maui.Pages.Authenticated.PlayerHome"
-             Title="PlayerHome">
-    <Label Text="PlayerHome — stub. Future TODO bullet fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="PlayerHome"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="{StaticResource Primary}">
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="0,30,0,30">
+
+                <!-- Title -->
+                <Label Text="{Binding Title}"
+                       TextColor="{StaticResource Primary}"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       FontFamily="Bungee"
+                       Margin="0,0,0,5"
+                       AutomationId="PlayerHomeTitleLabel" />
+
+                <!-- Error surface -->
+                <Label Text="{Binding ErrorText}"
+                       TextColor="{StaticResource Danger}"
+                       FontSize="12"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="{Binding HasErrors}"
+                       Margin="20,0"
+                       AutomationId="PlayerHomeErrorMessageLabel" />
+
+                <!-- Loading indicator -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Primary}"
+                                   HorizontalOptions="Center" />
+
+                <!-- ============================================================ -->
+                <!-- ====================== PENDING ============================ -->
+                <!-- ============================================================ -->
+                <VerticalStackLayout IsVisible="{Binding IsPending}" Spacing="20">
+
+                    <!-- Lobby card -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="0">
+                            <Border BackgroundColor="{StaticResource CardBackground}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12,12,0,0"
+                                    Padding="0,14">
+                                <Label Text="LOBBY"
+                                       TextColor="{StaticResource Tertiary}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       FontFamily="RobotoSlab"
+                                       HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <BoxView HeightRequest="1"
+                                     BackgroundColor="{StaticResource Gray200}"
+                                     HorizontalOptions="Fill" />
+
+                            <VerticalStackLayout Padding="20,15" Spacing="8"
+                                                 AutomationId="PlayerHomeLobbyPlayersList">
+
+                                <Label Text="No players yet."
+                                       TextColor="{StaticResource Gray600}"
+                                       FontSize="14"
+                                       HorizontalTextAlignment="Center"
+                                       IsVisible="{Binding HasLobbyPlayers, Converter={StaticResource InvertBoolConverter}}" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding LobbyPlayers}"
+                                                     Spacing="6"
+                                                     IsVisible="{Binding HasLobbyPlayers}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="items:PlayerItem">
+                                            <Border BackgroundColor="{StaticResource Gray100}"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    StrokeThickness="0"
+                                                    Padding="12,8">
+                                                <Label Text="{Binding DisplayName}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontSize="14" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Pending actions -->
+                    <VerticalStackLayout Spacing="10" Margin="20,0" HorizontalOptions="Center">
+
+                        <Button Text="Start game"
+                                Command="{Binding StartGameCommand}"
+                                IsVisible="{Binding IsCreator}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeStartGameButton" />
+
+                        <Button Text="Share invite"
+                                Command="{Binding ShareInviteCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                IsVisible="{Binding IsCreator}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeShareInviteButton" />
+
+                        <Button Text="Leave game"
+                                Command="{Binding LeaveCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                IsVisible="{Binding CanLeave}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeLeaveButton" />
+
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- ============================================================ -->
+                <!-- ====================== ACTIVE ============================== -->
+                <!-- ============================================================ -->
+                <VerticalStackLayout IsVisible="{Binding IsActive}" Spacing="20">
+
+                    <!-- Target card (alive + has open assignment) -->
+                    <Border IsVisible="{Binding HasTarget}"
+                            BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="0">
+                            <Border BackgroundColor="{StaticResource CardBackground}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12,12,0,0"
+                                    Padding="0,14">
+                                <Label Text="YOUR TARGET"
+                                       TextColor="{StaticResource Tertiary}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       FontFamily="RobotoSlab"
+                                       HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <BoxView HeightRequest="1"
+                                     BackgroundColor="{StaticResource Gray200}"
+                                     HorizontalOptions="Fill" />
+
+                            <VerticalStackLayout Padding="20,20" Spacing="12" HorizontalOptions="Center">
+
+                                <Border StrokeShape="RoundRectangle 50"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{StaticResource Gray200}"
+                                        WidthRequest="100"
+                                        HeightRequest="100"
+                                        HorizontalOptions="Center">
+                                    <Image Source="{Binding TargetImage}"
+                                           Aspect="AspectFill"
+                                           AutomationId="PlayerHomeTargetImage" />
+                                </Border>
+
+                                <Label Text="{Binding Target.TargetDisplayName}"
+                                       TextColor="{StaticResource Gray900}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"
+                                       AutomationId="PlayerHomeTargetNameLabel" />
+
+                                <Label Text="{Binding Target.AssignedDateText, StringFormat='Assigned {0}'}"
+                                       TextColor="{StaticResource Gray600}"
+                                       FontSize="12"
+                                       HorizontalTextAlignment="Center" />
+
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- "You were killed" card (only when dead) -->
+                    <Border IsVisible="{Binding IsAlive, Converter={StaticResource InvertBoolConverter}}"
+                            BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="20,20"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="YOU WERE KILLED"
+                                   TextColor="{StaticResource Danger}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   FontFamily="RobotoSlab"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding KilledByName, StringFormat='Killed by {0}'}"
+                                   TextColor="{StaticResource Gray900}"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center"
+                                   AutomationId="PlayerHomeKilledByLabel" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- My kills card -->
+                    <Border IsVisible="{Binding HasMyKills}"
+                            BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="0">
+                            <Border BackgroundColor="{StaticResource CardBackground}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12,12,0,0"
+                                    Padding="0,14">
+                                <Label Text="YOUR KILLS"
+                                       TextColor="{StaticResource Tertiary}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       FontFamily="RobotoSlab"
+                                       HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <BoxView HeightRequest="1"
+                                     BackgroundColor="{StaticResource Gray200}"
+                                     HorizontalOptions="Fill" />
+
+                            <VerticalStackLayout Padding="20,15" Spacing="6"
+                                                 AutomationId="PlayerHomeMyKillsList">
+
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,0,0,4">
+                                    <Label Grid.Column="0"
+                                           Text="VICTIM"
+                                           TextColor="{StaticResource Secondary}"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Column="1"
+                                           Text="WHEN"
+                                           TextColor="{StaticResource Secondary}"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                </Grid>
+
+                                <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray100}" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding MyKills}" Spacing="4">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="items:KillItem">
+                                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding VictimDisplayName}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontSize="13" />
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding MomentText}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Active actions (alive only) -->
+                    <VerticalStackLayout IsVisible="{Binding IsAlive}"
+                                         Spacing="10"
+                                         Margin="20,0"
+                                         HorizontalOptions="Center">
+
+                        <Button Text="Confirm kill"
+                                Command="{Binding ConfirmKillCommand}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeConfirmKillButton" />
+
+                        <Button Text="I was killed"
+                                Command="{Binding ConfirmKillCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeIWasKilledButton" />
+
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- ============================================================ -->
+                <!-- ====================== PAST =============================== -->
+                <!-- ============================================================ -->
+                <VerticalStackLayout IsVisible="{Binding IsPast}" Spacing="20">
+
+                    <!-- Winner banner -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Padding="20,20" Spacing="12" HorizontalOptions="Center">
+
+                            <Label Text="WINNER"
+                                   TextColor="{StaticResource Tertiary}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   FontFamily="RobotoSlab"
+                                   HorizontalTextAlignment="Center" />
+
+                            <Border StrokeShape="RoundRectangle 60"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource Gray200}"
+                                    WidthRequest="120"
+                                    HeightRequest="120"
+                                    HorizontalOptions="Center">
+                                <Image Source="{Binding WinnerImage}"
+                                       Aspect="AspectFill"
+                                       AutomationId="PlayerHomeWinnerImage" />
+                            </Border>
+
+                            <Label Text="{Binding WinnerDisplayName}"
+                                   TextColor="{StaticResource Primary}"
+                                   FontFamily="Bungee"
+                                   FontSize="22"
+                                   HorizontalTextAlignment="Center"
+                                   AutomationId="PlayerHomeWinnerNameLabel" />
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Players standings -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="0">
+                            <Border BackgroundColor="{StaticResource CardBackground}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12,12,0,0"
+                                    Padding="0,14">
+                                <Label Text="PLAYERS"
+                                       TextColor="{StaticResource Tertiary}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       FontFamily="RobotoSlab"
+                                       HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <BoxView HeightRequest="1"
+                                     BackgroundColor="{StaticResource Gray200}"
+                                     HorizontalOptions="Fill" />
+
+                            <VerticalStackLayout Padding="20,15" Spacing="6"
+                                                 BindableLayout.ItemsSource="{Binding PlayerStandings}"
+                                                 AutomationId="PlayerHomePlayerStandingsList">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="items:PastPlayerRow">
+                                        <Border BackgroundColor="{StaticResource Gray100}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0"
+                                                Padding="12,8">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.FilterByPlayerCommand, Source={x:Reference playerHomePage}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding DisplayName}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold" />
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding Status}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12"
+                                                       VerticalOptions="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Kills card -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Margin="20,0"
+                            Padding="0"
+                            HorizontalOptions="Center"
+                            MaximumWidthRequest="500">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource PrimaryBrush}"
+                                    Offset="0,0"
+                                    Radius="20"
+                                    Opacity="0.4" />
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="0">
+                            <Border BackgroundColor="{StaticResource CardBackground}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12,12,0,0"
+                                    Padding="0,14">
+                                <Label Text="KILLS"
+                                       TextColor="{StaticResource Tertiary}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       FontFamily="RobotoSlab"
+                                       HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <BoxView HeightRequest="1"
+                                     BackgroundColor="{StaticResource Gray200}"
+                                     HorizontalOptions="Fill" />
+
+                            <VerticalStackLayout Padding="20,15" Spacing="6">
+
+                                <Label Text="{Binding FilterDisplayText}"
+                                       TextColor="{StaticResource Secondary}"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"
+                                       AutomationId="PlayerHomeFilterDisplayLabel" />
+
+                                <Label Text="No kills to show."
+                                       TextColor="{StaticResource Gray600}"
+                                       FontSize="13"
+                                       HorizontalTextAlignment="Center"
+                                       IsVisible="{Binding HasFilteredKills, Converter={StaticResource InvertBoolConverter}}" />
+
+                                <Grid ColumnDefinitions="*,*,Auto" Padding="0,4,0,0"
+                                      IsVisible="{Binding HasFilteredKills}">
+                                    <Label Grid.Column="0"
+                                           Text="KILLER"
+                                           TextColor="{StaticResource Secondary}"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Column="1"
+                                           Text="VICTIM"
+                                           TextColor="{StaticResource Secondary}"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Column="2"
+                                           Text="WHEN"
+                                           TextColor="{StaticResource Secondary}"
+                                           FontSize="11"
+                                           FontAttributes="Bold" />
+                                </Grid>
+
+                                <BoxView HeightRequest="1"
+                                         BackgroundColor="{StaticResource Gray100}"
+                                         IsVisible="{Binding HasFilteredKills}" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredKills}"
+                                                     Spacing="4"
+                                                     IsVisible="{Binding HasFilteredKills}"
+                                                     AutomationId="PlayerHomeFilteredKillsList">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="items:KillItem">
+                                            <Grid ColumnDefinitions="*,*,Auto" Padding="0,4">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding KillerDisplayName}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontSize="13" />
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding VictimDisplayName}"
+                                                       TextColor="{StaticResource Gray900}"
+                                                       FontSize="13" />
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding MomentText}"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       FontSize="12" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Past action -->
+                    <VerticalStackLayout Spacing="10" Margin="20,0" HorizontalOptions="Center">
+                        <Button Text="Share final standings"
+                                Command="{Binding ShareStandingsCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                WidthRequest="220"
+                                AutomationId="PlayerHomeShareStandingsButton" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- Bottom spacer -->
+                <BoxView HeightRequest="30" BackgroundColor="Transparent" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </RefreshView>
+
 </ContentPage>
