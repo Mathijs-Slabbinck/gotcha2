@@ -3,9 +3,6 @@ using System.ComponentModel.DataAnnotations;
 namespace Gotcha2.API.Validation
 {
     // Used in: RegisterRequestDto.BirthDate
-    // Checks the value is a real-looking birthday: at least MinAge years old,
-    // and not older than MaxAge years (rejects obvious junk like 1800-01-01).
-    // Also rejects future dates.
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class ValidBirthdayAttribute : ValidationAttribute
     {
@@ -33,6 +30,7 @@ namespace Gotcha2.API.Validation
                 return new ValidationResult($"You must be at least {MinAge} years old.");
 
             DateTime maxAgeCutoff = today.AddYears(-MaxAge);
+
             if (birthDate < maxAgeCutoff)
                 return new ValidationResult($"Date of birth is not realistic (age over {MaxAge}).");
 
