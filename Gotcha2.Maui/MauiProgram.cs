@@ -17,6 +17,7 @@ using Games = Gotcha2.Maui.Pages.Authenticated.Games;
 using Settings = Gotcha2.Maui.Pages.Authenticated.Settings;
 using NewGame = Gotcha2.Maui.Pages.Authenticated.NewGame;
 using PlayerHome = Gotcha2.Maui.Pages.Authenticated.PlayerHome;
+using ConfirmKill = Gotcha2.Maui.Pages.Authenticated.ConfirmKill;
 
 namespace Gotcha2.Maui
 {
@@ -31,7 +32,7 @@ namespace Gotcha2.Maui
             // Phase 6 — uncomment as they land:
             Routing.RegisterRoute(RoutesConstants.NewGame, typeof(NewGame));
             Routing.RegisterRoute(RoutesConstants.PlayerHome, typeof(PlayerHome));
-            // Routing.RegisterRoute(RoutesConstants.ConfirmKill, typeof(ConfirmKill));
+            Routing.RegisterRoute(RoutesConstants.ConfirmKill, typeof(ConfirmKill));
 
             MauiAppBuilder builder = MauiApp.CreateBuilder();
             builder
@@ -92,7 +93,7 @@ namespace Gotcha2.Maui
             builder.Services.AddTransient<NewGameViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<PlayerHomeViewModel>();
-            // builder.Services.AddTransient<ConfirmKillViewModel>();
+            builder.Services.AddTransient<ConfirmKillViewModel>();
 
             // === Validators (Phase 9) ===
             // Transient — stateless rule definitions; one instance per VM injection.
@@ -112,7 +113,7 @@ namespace Gotcha2.Maui
             // Phase 6 — relative-route pages:
             builder.Services.AddTransient<NewGame>();
             builder.Services.AddTransient<PlayerHome>();
-            // builder.Services.AddTransient<ConfirmKill>();
+            builder.Services.AddTransient<ConfirmKill>();
 
             return builder.Build();
         }

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             x:DataType="viewmodels:ConfirmKillViewModel"
+             x:Class="Gotcha2.Maui.Pages.Authenticated.ConfirmKill"
+             Title="Confirm Kill"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="0,30,0,30">
+
+            <!-- Title -->
+            <Label Text="CONFIRM KILL"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   FontFamily="Bungee"
+                   Margin="0,0,0,5"
+                   AutomationId="ConfirmKillTitleLabel" />
+
+            <!-- Game name subtitle -->
+            <Label Text="{Binding Title}"
+                   TextColor="{StaticResource Gray400}"
+                   FontSize="14"
+                   HorizontalTextAlignment="Center"
+                   AutomationId="ConfirmKillGameNameLabel" />
+
+            <!-- Loading indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Primary}"
+                               HorizontalOptions="Center" />
+
+            <!-- Target card -->
+            <Border BackgroundColor="{StaticResource CardBackground}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Margin="20,0"
+                    Padding="0"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="500">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource PrimaryBrush}"
+                            Offset="0,0"
+                            Radius="20"
+                            Opacity="0.4" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Card header -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12,12,0,0"
+                            Padding="0,14">
+                        <Label Text="YOUR TARGET"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource Gray200}"
+                             HorizontalOptions="Fill" />
+
+                    <!-- Has-target view -->
+                    <VerticalStackLayout Padding="20,20" Spacing="12"
+                                         HorizontalOptions="Center"
+                                         IsVisible="{Binding HasTarget}">
+
+                        <Border StrokeShape="RoundRectangle 50"
+                                StrokeThickness="0"
+                                BackgroundColor="{StaticResource Gray200}"
+                                WidthRequest="100"
+                                HeightRequest="100"
+                                HorizontalOptions="Center">
+                            <Image Source="{Binding TargetImage}"
+                                   Aspect="AspectFill"
+                                   AutomationId="ConfirmKillTargetImage" />
+                        </Border>
+
+                        <Label Text="{Binding Target.TargetDisplayName}"
+                               TextColor="{StaticResource Gray900}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               AutomationId="ConfirmKillTargetNameLabel" />
+
+                    </VerticalStackLayout>
+
+                    <!-- No-target fallback -->
+                    <VerticalStackLayout Padding="20,20"
+                                         IsVisible="{Binding HasTarget, Converter={StaticResource InvertBoolConverter}}">
+                        <Label Text="No active target."
+                               TextColor="{StaticResource Gray600}"
+                               FontSize="14"
+                               HorizontalTextAlignment="Center"
+                               AutomationId="ConfirmKillNoTargetLabel" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error surface -->
+            <Label Text="{Binding ErrorText}"
+                   TextColor="{StaticResource Danger}"
+                   FontSize="12"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding HasErrors}"
+                   Margin="20,0"
+                   AutomationId="ConfirmKillErrorMessageLabel" />
+
+            <!-- Actions -->
+            <VerticalStackLayout Spacing="10" Margin="20,0" HorizontalOptions="Center">
+
+                <Button Text="I got my target"
+                        Command="{Binding ReportTargetKillCommand}"
+                        IsEnabled="{Binding CanReportTargetKill}"
+                        WidthRequest="220"
+                        AutomationId="ConfirmKillGotTargetButton" />
+
+                <Button Text="I was killed"
+                        Command="{Binding ReportSelfKillCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        IsEnabled="{Binding CanReportSelfKill}"
+                        WidthRequest="220"
+                        AutomationId="ConfirmKillIWasKilledButton" />
+
+            </VerticalStackLayout>
+
+            <!-- Bottom spacer -->
+            <BoxView HeightRequest="30" BackgroundColor="Transparent" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
