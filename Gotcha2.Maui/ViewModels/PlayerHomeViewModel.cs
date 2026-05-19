@@ -8,9 +8,9 @@ using System.Windows.Input;
 
 namespace Gotcha2.Maui.ViewModels
 {
-    /* QueryProperty attribute allows passing parameters via Shell navigation.
-     * In this case, the GameId is passed as a string query parameter and parsed into a Guid.
-     * We chose this because the alternative would be harder to read */
+    /* --- comment ---
+     * QueryProperty attribute allows passing parameters via Shell navigation.
+     * In this case, the GameId is passed as a string query parameter and parsed into a Guid. */
     [QueryProperty(nameof(GameIdRaw), "gameId")]
 
     public class PlayerHomeViewModel : PageBaseViewModel
