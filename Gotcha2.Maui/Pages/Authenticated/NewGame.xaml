@@ -1,9 +1,112 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Gotcha2.Maui.ViewModels"
+             x:DataType="viewmodels:NewGameViewModel"
              x:Class="Gotcha2.Maui.Pages.Authenticated.NewGame"
-             Title="NewGame">
-    <Label Text="NewGame — stub. Next TODO bullet fills this in."
-           HorizontalOptions="Center"
-           VerticalOptions="Center" />
+             Title="New Game"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" VerticalOptions="Center" Padding="0,30,0,0">
+
+            <!-- Title -->
+            <Label Text="START A NEW GAME"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   FontFamily="Bungee"
+                   Margin="0,0,0,25" />
+
+            <!-- New Game card -->
+            <Border BackgroundColor="{StaticResource CardBackground}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Margin="20,0"
+                    Padding="0"
+                    HorizontalOptions="Center"
+                    MaximumWidthRequest="500">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource PrimaryBrush}"
+                            Offset="0,0"
+                            Radius="20"
+                            Opacity="0.4" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Card header -->
+                    <Border BackgroundColor="{StaticResource CardBackground}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12,12,0,0"
+                            Padding="0,14">
+                        <Label Text="NEW GAME"
+                               TextColor="{StaticResource Tertiary}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               FontFamily="RobotoSlab"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource Gray200}"
+                             HorizontalOptions="Fill" />
+
+                    <!-- Form content -->
+                    <VerticalStackLayout Padding="30,20" Spacing="5">
+
+                        <!-- Name -->
+                        <Label Text="Name:"
+                               TextColor="{StaticResource Tertiary}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,0,0,5" />
+                        <Border Stroke="{StaticResource Secondary}"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 4"
+                                Padding="8,0"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Entry Text="{Binding Name}"
+                                   Placeholder="e.g. Friday night Gotcha"
+                                   HorizontalTextAlignment="Center"
+                                   MaxLength="100"
+                                   ReturnType="Done"
+                                   TextColor="{StaticResource Gray900}"
+                                   PlaceholderColor="{StaticResource Gray400}"
+                                   BackgroundColor="Transparent"
+                                   AutomationId="NameEntry" />
+                        </Border>
+                        <Label Text="{Binding NameError}"
+                               TextColor="{StaticResource Danger}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,0"
+                               IsVisible="{Binding NameError, Converter={StaticResource StringNotEmptyConverter}}"
+                               AutomationId="NameErrorLabel" />
+
+                        <!-- Error (server / generic) -->
+                        <Label Text="{Binding ErrorText}"
+                               TextColor="{StaticResource Danger}"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,10,0,0"
+                               IsVisible="{Binding HasErrors}"
+                               AutomationId="ErrorMessageLabel" />
+
+                        <!-- Create -->
+                        <Button Text="Create"
+                                Command="{Binding CreateCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                                HorizontalOptions="Center"
+                                WidthRequest="220"
+                                Margin="0,15,0,0"
+                                AutomationId="CreateButton" />
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

@@ -47,11 +47,11 @@ namespace Gotcha2.Maui.ViewModels
             {
                 ResetErrors();
 
-                string trimmed = Name?.Trim() ?? string.Empty;
+                string trimmedName = Name?.Trim() ?? string.Empty;
 
-                if (string.IsNullOrEmpty(trimmed))
+                if (string.IsNullOrEmpty(trimmedName))
                     NameError = "Name is required.";
-                else if (trimmed.Length > MaxNameLength)
+                else if (trimmedName.Length > MaxNameLength)
                     NameError = $"Name is too long (max {MaxNameLength} characters).";
 
                 if (!string.IsNullOrEmpty(NameError))
@@ -59,7 +59,7 @@ namespace Gotcha2.Maui.ViewModels
 
                 IsBusy = true;
 
-                GameRequestDto request = new GameRequestDto { Name = trimmed };
+                GameRequestDto request = new GameRequestDto { Name = trimmedName };
                 ResultModel<GameItem> result = await _gameService.CreateAsync(request);
 
                 if (!result.IsSuccess || result.Data is null)
@@ -68,8 +68,9 @@ namespace Gotcha2.Maui.ViewModels
                     return;
                 }
 
-                // Replace NewGame in the nav stack with PlayerHome (Pending state) so the
-                // back button returns the user to Games rather than to this now-empty form.
+                /* --- comment ---
+                 * Replace NewGame in the nav stack with PlayerHome (Pending state)
+                 * so the back button returns the user to Games rather than to this now-empty form. */
                 await Shell.Current.GoToAsync($"../{RoutesConstants.PlayerHome}?gameId={result.Data.GameId}");
             }
             catch
